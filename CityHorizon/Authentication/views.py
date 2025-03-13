@@ -45,7 +45,7 @@ class Login(APIView):
             token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
 
             response = Response()
-            response.set_cookie(key='jwt', value=token, httponly=True, secure=config('COOKIE_SECURE', cast=bool))
+            response.set_cookie(key='jwt', value=token, httponly=True, samesite=None, secure=config('COOKIE_SECURE', cast=bool))
             response.data = {'jwt': token}
             return response
         return Response({'fail': 'your email or password is incorrect'})
