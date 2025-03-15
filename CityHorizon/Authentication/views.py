@@ -22,17 +22,23 @@ import jwt, datetime
 
 class SignUp(APIView):
     def post(self, request):
-        request.data['Type']='Citizen'
+        request.data['Type'] = 'Citizen'
         email = request.data['Email']
         Typeof = 'Citizen'
+
         if User.objects.filter(Email=email, Type=Typeof).first() is None:
-            # save it private using dotenv or environ
+            # ایجاد توکن تأیید ایمیل
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
-            absurl = f'http://127.0.0.1:8000/auth/email-verification/{token}/'
+
+            # هدایت کاربر به فرانت‌اند React در localhost:5173
+            frontend_url = f'http://localhost:5173/verifyemail?token={token}'
+
+            # ایجاد کاربر
             user = User(FullName=request.data['FullName'], Email=email, Type=Typeof)
             user.set_password(request.data['Password'])
             user.save()
 
+            # قالب ایمیل
             from django.template import Template, Context
             user_name = user.FullName
 
@@ -41,17 +47,17 @@ class SignUp(APIView):
             email_body_template = Template("""
 Dear {{ user_name }},
 
-Click on this link for complete signning up:
+Click on this link to complete your sign-up:
 
 {{ verification_code }}
 
-This link will depreacated until 24 hours later
+This link will expire in 24 hours.
 
 The Shahrsanj Team
 """)
             context = Context({
                 'user_name': user_name,
-                'verification_code': absurl,
+                'verification_code': frontend_url,  # ارسال لینک جدید فرانت‌اند
             })
 
             email_body = email_body_template.render(context)
@@ -62,9 +68,10 @@ The Shahrsanj Team
                 'email_subject': subject
             }
             Util.send_email(data)
-            return Response({'success': 'We have sent you a link to verify yout email address'})
+
+            return Response({'success': 'We have sent you a link to verify your email address'})
         else:
-            return Response({'fail': 'there is a user with this email'})
+            raise AuthenticationFailed('user with this Email already exists.')
 
 
 class Login(APIView):
@@ -77,7 +84,7 @@ class Login(APIView):
 
         if user is not None and user.check_password(password):
             if user.Verified==False and user.Type=='Citizen':
-                return Response({'fail':'Please verify your account via email'})
+                raise AuthenticationFailed('Please verify your account via Email.')
 
             payload = {
                 'id': user.id,
@@ -91,7 +98,7 @@ class Login(APIView):
             response.set_cookie(key='jwt', value=token, httponly=True, samesite='None', secure=config('COOKIE_SECURE', cast=bool))
             response.data = {'jwt': token}
             return response
-        return Response({'fail': 'your email or password is incorrect'})
+        raise AuthenticationFailed('your email or password is incorrect')
 
 class Profile(APIView):
     def get(self, request):
@@ -170,7 +177,7 @@ The Shahrsanj Team
             Util.send_email(data)
             return Response({'success': 'We have sent you a link to reset your password'})
         else:
-            return Response({'fail': 'There is no such user'})
+            raise AuthenticationFailed('There is no such user')
 
 
 class PasswordTokenCheck(APIView):
@@ -180,10 +187,10 @@ class PasswordTokenCheck(APIView):
             user = User.objects.get(id=id)
 
             if not PasswordResetTokenGenerator().check_token(user, token):
-                return Response({'fail': 'Invalid token'})
+                raise AuthenticationFailed('Invalid token')
             return Response({'message':'Credentials valid', 'ui64':ui64, 'token':token})
         except DjangoUnicodeDecodeError:
-            return Response({'fail': 'Invalid token'})
+            raise AuthenticationFailed('Invalid token')
 
 class SetNewPassword(APIView):
     serializer_class = SetNewPasswordSerializer
@@ -202,6 +209,6 @@ class EmailVerification(APIView):
             user.save()
             return Response({'success': 'verified successfully'})
         except signing.BadSignature:
-            return Response({'failed': 'bad signature'})
+            raise AuthenticationFailed('bad signature')
         except User.DoesNotExist:
-            return Response({'failed': 'user not found'})
+            raise AuthenticationFailed('user not found')
