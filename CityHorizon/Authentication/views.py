@@ -7,12 +7,13 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from .utils import Util
 from django.core.mail import send_mail
+from django.core import signing
 from CityHorizon.settings import EMAIL_HOST_USER
 from decouple import config
 from rest_framework import generics
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
-from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer
+from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, UnVerifiedUser
 from rest_framework.response import Response
 from .models import User
 import jwt, datetime
@@ -23,8 +24,47 @@ class SignUp(APIView):
         request.data['Type']='Citizen'
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        email = serializer.data['Email']
+        Typeof = serializer.data['Type']
+        if User.objects.filter(Email=email, Type=Typeof).exists() is None:
+            token = urlsafe_base64_encode(smart_bytes(str(hash(email + "my_secret_key"))))
+            absurl = f'http://127.0.0.1:8000/auth/email-verification/{token}/'
+
+            from django.template import Template, Context
+            user_name = serializer.FullName
+
+            subject = 'Verify Your Shahrsanj Account'
+
+            email_body_template = Template("""
+Dear {{ user_name }},
+
+Click on this link for complete signning up:
+
+{{ verification_code }}
+
+This link will depreacated until 24 hours later
+
+The Shahrsanj Team
+""")
+            context = Context({
+                'user_name': user_name,
+                'verification_code': absurl,
+            })
+
+            email_body = email_body_template.render(context)
+
+            data = {
+                'email_body': email_body,
+                'to_email': email,
+                'email_subject': subject
+            }
+            Util.send_email(data)
+            unverified_serializer = UnVerifiedUser(data={**serializer.data, 'Token': token})
+            unverified_serializer.save()
+            return Response({'success': 'We have sent you a link to verify yout email address'})
+        else:
+            return Response({'fail': 'there is a user with this email'})
+
 
 class Login(APIView):
     def post(self, request):
