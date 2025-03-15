@@ -153,7 +153,7 @@ class CityList(APIView):
 
         myprovince = Provinces.objects.filter(id=request.data['ProvinceID']).first()
         if myprovince is None:
-            return Response({'fail': 'Province not found!'})
+            raise AuthenticationFailed('Province not found!')
 
         mycities = Cities.objects.filter(Province=myprovince).all()
         serializer = CitySerializer(mycities, many=True)
@@ -193,7 +193,7 @@ class AddMayorZone(APIView):
             mayorzone = MayorZones(User=mayor, CityZone=cityzone)
             mayorzone.save()
             return Response({'success': 'Mayor zone added!'})
-        return Response({'fail': 'Mayor already added!'})
+        raise AuthenticationFailed('Mayor already added!')
 
 class ListMayorZone(APIView):
     def post(self, request):
@@ -253,6 +253,6 @@ class RemoveMayorZone(APIView):
             raise AuthenticationFailed("Mayor not found!")
         mayorzone = MayorZones.objects.filter(User=mayor, CityZone=cityzone).first()
         if mayorzone is None:
-            return Response({'fail': 'Mayor zone does not exist'})
+            raise AuthenticationFailed('Mayor zone does not exist')
         mayorzone.delete()
         return Response({'success': 'Mayor zone deleted'})
