@@ -4,7 +4,7 @@ from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
-from .models import User, UnVerifiedUser
+from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -56,8 +56,3 @@ class SetNewPasswordSerializer(serializers.Serializer):
             return attrs
         except:
             raise AuthenticationFailed('The reset link is invalid')
-
-class UnVerifiedUserSerializer(serializers.SErializer):
-    class Meta:
-        model = UnVerifiedUser
-        fields = ['FullName', 'Email', 'Password', 'Type', "Token"]
