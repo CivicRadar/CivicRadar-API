@@ -33,6 +33,9 @@ class SignUp(APIView):
             # save it private using dotenv or environ
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
             absurl = f'http://127.0.0.1:8000/auth/email-verification/{token}/'
+            user = User(FullName=request.data['FullName'], Email=email, Type=Typeof)
+            user.set_password(request.data['Password'])
+            user.save()
 
             from django.template import Template, Context
             user_name = serializer.data['FullName']
@@ -77,6 +80,8 @@ class Login(APIView):
         user = User.objects.filter(Email=email, Type=typeof).first()
 
         if user is not None and user.check_password(password):
+            if user.Verified==False and user.Type=='Citizen':
+                return Response({'fail':'Please verify your account via email'})
 
             payload = {
                 'id': user.id,
@@ -87,7 +92,7 @@ class Login(APIView):
             token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
 
             response = Response()
-            response.set_cookie(key='jwt', value=token, httponly=True, samesite=None, secure=config('COOKIE_SECURE', cast=bool))
+            response.set_cookie(key='jwt', value=token, httponly=True, samesite='None', secure=config('COOKIE_SECURE', cast=bool))
             response.data = {'jwt': token}
             return response
         return Response({'fail': 'your email or password is incorrect'})
@@ -197,7 +202,8 @@ class EmailVerification(APIView):
         try:
             data = signing.loads(token, salt="my_verification_salt", max_age=24 * 60 * 60)
             user = User.objects.get(Email=data['email_address'])
-            user.save(update_fields={'Verified': True})
+            user.Verified=True
+            user.save()
             return Response({'success': 'verified successfully'})
         except signing.BadSignature:
             return Response({'failed': 'bad signature'})
