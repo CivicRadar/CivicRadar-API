@@ -13,9 +13,10 @@ from decouple import config
 from rest_framework import generics
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
-from .serializers import UnVerifiedUserSerializer, UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer
+from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer
 from rest_framework.response import Response
-from .models import User, UnVerifiedUser
+from .models import User
+from django.core import signing
 import jwt, datetime
 
 
@@ -27,7 +28,10 @@ class SignUp(APIView):
         email = serializer.data['Email']
         Typeof = serializer.data['Type']
         if User.objects.filter(Email=email, Type=Typeof).exists() is None:
-            # token = urlsafe_base64_encode(smart_bytes(str(hash(email + "my_secret_key"))))
+            # save it private using dotenv or environ
+            token = signing.dumps({'email_address': email}, salt="my_verification_salt")
+            serializer.update(serializer.data, 'Verified', False)
+            serializer.save()
             absurl = f'http://127.0.0.1:8000/auth/email-verification/{token}/'
 
             from django.template import Template, Context
@@ -59,8 +63,6 @@ The Shahrsanj Team
                 'email_subject': subject
             }
             Util.send_email(data)
-            unverified_serializer = UnVerifiedUserSerializer(data={**serializer.data, 'Token': token})
-            unverified_serializer.save()
             return Response({'success': 'We have sent you a link to verify yout email address'})
         else:
             return Response({'fail': 'there is a user with this email'})
@@ -192,5 +194,12 @@ class SetNewPassword(APIView):
 
 class EmailVerification(APIView):
     def get(self, request, token):
-        unverifiedUser = UnVerifiedUser.objects.filter(Token=token)
-        # create token using email and then verify its time for depreaction and then success the process
+        try:
+            data = signing.loads(token, salt="my_verification_salt", max_age=24 * 60 * 60)
+            user = User.objects.get(Email=data['email_address'])
+            user.save(update_fields={'Verified': True})
+            return Response({'success': 'verified successfully'})
+        except signing.BadSignature:
+            return Response({'failed': 'bad signature'})
+        except User.DoesNotExist:
+            return Response({'failed': 'user not found'})
