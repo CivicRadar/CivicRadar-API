@@ -1,3 +1,4 @@
+import copy
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -8,7 +9,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['FullName', 'Email', 'Password', 'Type']
+        fields = ['FullName', 'Email', 'Password', 'Type', 'Verified']
         extra_kwargs = {
             'Password': {'write_only': True}
         }
@@ -20,6 +21,12 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(Password)
         instance.save()
         return instance
+
+    def update(self, validated_data, key, value):
+        new_data = copy.deepcopy(validated_data)
+        new_data[key] = value
+        return new_data
+
 
 class UserIDSerializer(serializers.ModelSerializer):
     class Meta:
