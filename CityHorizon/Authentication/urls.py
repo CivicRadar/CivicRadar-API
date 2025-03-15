@@ -8,4 +8,5 @@ urlpatterns = [
     path('request-reset-email/', RequestPasswordReset.as_view(), name='request-reset-email'),
     path('password-reset/<ui64>/<token>/', PasswordTokenCheck.as_view(), name='password-reset-confirmed'),
     path('password-reset-complete/', SetNewPassword.as_view(), name='password-reset-complete'),
+    # path('email-verification/<token>/', )
 ]

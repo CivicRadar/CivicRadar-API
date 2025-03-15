@@ -13,9 +13,9 @@ from decouple import config
 from rest_framework import generics
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
-from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, UnVerifiedUser
+from .serializers import UnVerifiedUserSerializer, UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer
 from rest_framework.response import Response
-from .models import User
+from .models import User, UnVerifiedUser
 import jwt, datetime
 
 
@@ -27,7 +27,7 @@ class SignUp(APIView):
         email = serializer.data['Email']
         Typeof = serializer.data['Type']
         if User.objects.filter(Email=email, Type=Typeof).exists() is None:
-            token = urlsafe_base64_encode(smart_bytes(str(hash(email + "my_secret_key"))))
+            # token = urlsafe_base64_encode(smart_bytes(str(hash(email + "my_secret_key"))))
             absurl = f'http://127.0.0.1:8000/auth/email-verification/{token}/'
 
             from django.template import Template, Context
@@ -59,7 +59,7 @@ The Shahrsanj Team
                 'email_subject': subject
             }
             Util.send_email(data)
-            unverified_serializer = UnVerifiedUser(data={**serializer.data, 'Token': token})
+            unverified_serializer = UnVerifiedUserSerializer(data={**serializer.data, 'Token': token})
             unverified_serializer.save()
             return Response({'success': 'We have sent you a link to verify yout email address'})
         else:
@@ -189,3 +189,8 @@ class SetNewPassword(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success':'Password updated successfully'})
+
+class EmailVerification(APIView):
+    def get(self, request, token):
+        unverifiedUser = UnVerifiedUser.objects.filter(Token=token)
+        # create token using email and then verify its time for depreaction and then success the process
