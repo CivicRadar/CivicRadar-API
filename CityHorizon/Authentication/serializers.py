@@ -7,12 +7,11 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from .models import User
 class UserSerializer(serializers.ModelSerializer):
+    Password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
         fields = ['FullName', 'Email', 'Password', 'Type', 'Verified']
-        extra_kwargs = {
-            'Password': {'write_only': True}
-        }
 
     def create(self, validated_data):
         Password = validated_data.pop('Password', None)
@@ -21,12 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(Password)
         instance.save()
         return instance
-
-    def update(self, validated_data, key, value):
-        new_data = copy.deepcopy(validated_data)
-        new_data[key] = value
-        return new_data
-
 
 class UserIDSerializer(serializers.ModelSerializer):
     class Meta:

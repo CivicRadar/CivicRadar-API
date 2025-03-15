@@ -23,19 +23,19 @@ import jwt, datetime
 class SignUp(APIView):
     def post(self, request):
         request.data['Type']='Citizen'
-        serializer = UserSerializer(data=request.data)
+        data = { **request.data, "Verified": False }
+        serializer = UserSerializer(data=data)
         serializer.is_valid(raise_exception=True)
+        serializer.save()
         email = serializer.data['Email']
         Typeof = serializer.data['Type']
-        if User.objects.filter(Email=email, Type=Typeof).exists() is None:
+        if User.objects.filter(Email=email, Type=Typeof).exists() is not None:
             # save it private using dotenv or environ
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
-            serializer.update(serializer.data, 'Verified', False)
-            serializer.save()
             absurl = f'http://127.0.0.1:8000/auth/email-verification/{token}/'
 
             from django.template import Template, Context
-            user_name = serializer.FullName
+            user_name = serializer.data['FullName']
 
             subject = 'Verify Your Shahrsanj Account'
 
@@ -63,7 +63,7 @@ The Shahrsanj Team
                 'email_subject': subject
             }
             Util.send_email(data)
-            return Response({'success': 'We have sent you a link to verify yout email address'})
+            return Response({'success': 'We have sent you a link to verify your email address'})
         else:
             return Response({'fail': 'there is a user with this email'})
 
