@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Provinces, Cities, CityZones, MayorZones
+from .models import Provinces, Cities
 
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,11 +11,11 @@ class CitySerializer(serializers.ModelSerializer):
         model = Cities
         fields = '__all__'
 
-class MayorCityZoneSerializer(serializers.Serializer):
+class MayorCitySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     MayorID = serializers.IntegerField(source='User.id')
     MayorFullName = serializers.CharField(source='User.FullName')
     MayorEmail = serializers.EmailField(source='User.Email')
-    CityZone = serializers.IntegerField(source='CityZone.Number')
-    City = serializers.CharField(source='CityZone.City.Name')
-    Province = serializers.CharField(source='CityZone.City.Province.Name')
+    City = serializers.CharField(source='City.Name')
+    CityID = serializers.CharField(source='City.id')
+    Province = serializers.CharField(source='City.Province.Name')

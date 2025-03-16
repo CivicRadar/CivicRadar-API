@@ -100,6 +100,16 @@ class Login(APIView):
             return response
         raise AuthenticationFailed('your email or password is incorrect')
 
+class Logout(APIView):
+    def get(self, request):
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {
+            'message': 'You have been logged out.'
+        }
+
+        return response
+
 class Profile(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
