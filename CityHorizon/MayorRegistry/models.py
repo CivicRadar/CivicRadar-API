@@ -11,14 +11,8 @@ class Cities(models.Model):
     class Meta:
         unique_together = ('Name', 'Province')
 
-class CityZones(models.Model):
-    Number = models.IntegerField()
+class MayorCities(models.Model):
+    User = models.ForeignKey(User, on_delete=models.CASCADE)
     City = models.ForeignKey(Cities, on_delete=models.CASCADE)
     class Meta:
-        unique_together = ('Number', 'City')
-
-class MayorZones(models.Model):
-    User = models.ForeignKey(User, on_delete=models.CASCADE)
-    CityZone = models.ForeignKey(CityZones, on_delete=models.CASCADE)
-    class Meta:
-        unique_together = ('User', 'CityZone')
+        unique_together = ('User', 'City')

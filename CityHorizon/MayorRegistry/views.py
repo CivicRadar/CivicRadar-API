@@ -4,9 +4,9 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import User
-from .models import Provinces, Cities, CityZones, MayorZones
+from .models import Provinces, Cities, MayorCities
 from Authentication.serializers import UserSerializer, UserIDSerializer
-from .serializers import ProvinceSerializer, CitySerializer, MayorCityZoneSerializer
+from .serializers import ProvinceSerializer, CitySerializer, MayorCitySerializer
 import jwt, datetime
 
 # Create your views here.
@@ -28,11 +28,19 @@ class Add(APIView):
         serializer = UserSerializer(user)
         if serializer.data['Type']!= 'Admin':
             raise AuthenticationFailed("You are Not Admin!")
+        city = Cities.objects.filter(id=request.data['CityID']).first()
         request.data['Type']='Mayor'
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        mayor = User.objects.filter(Email=request.data['Email']).first()
+        mayorcity = MayorCities.objects.filter(User=mayor, City=city).first()
+        if mayorcity is None:
+            mayorcity = MayorCities(User=mayor, City=city)
+            mayorcity.save()
+            return Response({'success': 'Mayor city added!'})
+        raise AuthenticationFailed('Only mayor added!')
+        # return Response(serializer.data)
 
 class List(APIView):
     def get(self, request):
@@ -159,7 +167,7 @@ class CityList(APIView):
         serializer = CitySerializer(mycities, many=True)
         return Response(serializer.data)
 
-class AddMayorZone(APIView):
+class AddMayorCity(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -181,21 +189,18 @@ class AddMayorZone(APIView):
         city = Cities.objects.filter(id=request.data['CityID']).first()
         if city is None:
             raise AuthenticationFailed("City not found!")
-        cityzone = CityZones.objects.filter(Number=request.data['CityZoneNumber']).first()
-        if cityzone is None:
-            cityzone = CityZones.objects.create(Number=request.data['CityZoneNumber'], City=city)
 
         mayor = User.objects.filter(id=request.data['MayorID'], Type='Mayor').first()
         if mayor is None:
             raise AuthenticationFailed("Mayor not found!")
-        mayorzone = MayorZones.objects.filter(User=mayor, CityZone=cityzone).first()
-        if mayorzone is None:
-            mayorzone = MayorZones(User=mayor, CityZone=cityzone)
-            mayorzone.save()
-            return Response({'success': 'Mayor zone added!'})
-        raise AuthenticationFailed('Mayor already added!')
+        mayorcity = MayorCities.objects.filter(User=mayor, City=city).first()
+        if mayorcity is None:
+            mayorcity = MayorCities(User=mayor, City=city)
+            mayorcity.save()
+            return Response({'success': 'Mayor city added!'})
+        raise AuthenticationFailed('Mayor City already added!')
 
-class ListMayorZone(APIView):
+class ListMayorCity(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -218,11 +223,11 @@ class ListMayorZone(APIView):
         if mayor is None:
             raise AuthenticationFailed("Mayor not found!")
 
-        mayorzones = MayorZones.objects.filter(User=mayor).all()
-        serializer = MayorCityZoneSerializer(mayorzones, many=True)
+        mayorcities = MayorCities.objects.filter(User=mayor).all()
+        serializer = MayorCitySerializer(mayorcities, many=True)
         return Response(serializer.data)
 
-class RemoveMayorZone(APIView):
+class RemoveMayorCity(APIView):
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -244,15 +249,12 @@ class RemoveMayorZone(APIView):
         city = Cities.objects.filter(id=request.data['CityID']).first()
         if city is None:
             raise AuthenticationFailed("City not found!")
-        cityzone = CityZones.objects.filter(Number=request.data['CityZoneNumber']).first()
-        if cityzone is None:
-            cityzone = CityZones.objects.create(Number=request.data['CityZoneNumber'], City=city)
 
         mayor = User.objects.filter(id=request.data['MayorID'], Type='Mayor').first()
         if mayor is None:
             raise AuthenticationFailed("Mayor not found!")
-        mayorzone = MayorZones.objects.filter(User=mayor, CityZone=cityzone).first()
-        if mayorzone is None:
-            raise AuthenticationFailed('Mayor zone does not exist')
-        mayorzone.delete()
-        return Response({'success': 'Mayor zone deleted'})
+        mayorcity = MayorCities.objects.filter(User=mayor, City=city).first()
+        if mayorcity is None:
+            raise AuthenticationFailed('Mayor city does not exist')
+        mayorcity.delete()
+        return Response({'success': 'Mayor city deleted'})
