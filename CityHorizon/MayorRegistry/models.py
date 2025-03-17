@@ -16,3 +16,20 @@ class MayorCities(models.Model):
     City = models.ForeignKey(Cities, on_delete=models.CASCADE)
     class Meta:
         unique_together = ('User', 'City')
+
+class CityReport(models.Model):
+    City = models.ForeignKey(Cities, on_delete=models.CASCADE)
+    Information = models.TextField()
+    Reporter = models.ForeignKey(User, on_delete=models.CASCADE)
+    DateTime = models.DateTimeField(auto_now_add=True)
+
+class CityReportProsecute(models.Model):
+    status_type = [
+        ('examination', 'examination'),
+        ('solved','solved'),
+    ]
+
+    CityReport = models.ForeignKey(CityReport, on_delete=models.CASCADE)
+    Prosecuter = models.ForeignKey(User, on_delete=models.CASCADE)
+    Status = models.CharField(choices=status_type, max_length=20)
+    DateTime = models.DateTimeField(auto_now=True)

@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from Authentication.models import User
 from .models import Provinces, Cities, MayorCities
 from Authentication.serializers import UserSerializer, UserIDSerializer
-from .serializers import ProvinceSerializer, CitySerializer, MayorCitySerializer, MayorInfoSerializer
+from .serializers import ProvinceSerializer, CitySerializer, MayorCitySerializer, MayorInfoSerializer, MayorComplexSerializer
 import jwt, datetime
 
 # Create your views here.
@@ -305,4 +305,27 @@ class CityMayors(APIView):
         mayorcity = MayorCities.objects.filter(City__id=request.data['CityID']).values_list('User__id', flat=True)
         mayors = User.objects.filter(id__in=mayorcity, Type='Mayor').all()
         serializer = MayorInfoSerializer(mayors, many=True)
+        return Response(serializer.data)
+
+class MayorComplex(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        serializer = UserSerializer(user)
+        if serializer.data['Type']!= 'Admin':
+            raise AuthenticationFailed("You are Not Admin!")
+
+        mayors = User.objects.filter(Type='Mayor').all()
+        serializer = MayorComplexSerializer(mayors, many=True)
         return Response(serializer.data)
