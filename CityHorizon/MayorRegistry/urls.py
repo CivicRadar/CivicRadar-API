@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import Add, List, Update, Delete, ProvinceList, CityList, AddMayorCity, ListMayorCity, RemoveMayorCity
+from .views import Add, List, Update, Delete, ProvinceList, CityList, AddMayorCity, ListMayorCity, RemoveMayorCity, \
+                   CityMayors, ProvinceMayors
 
 urlpatterns = [
     path('add/', Add.as_view()),
@@ -11,4 +12,6 @@ urlpatterns = [
     path('add-mayor-city/', AddMayorCity.as_view()),
     path('list-mayor-city/', ListMayorCity.as_view()),
     path('remove-mayor-city/', RemoveMayorCity.as_view()),
+    path('mayors-of-city/', CityMayors.as_view()),
+    path('mayors-of-province/', ProvinceMayors.as_view()),
 ]

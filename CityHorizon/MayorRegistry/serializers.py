@@ -19,3 +19,9 @@ class MayorCitySerializer(serializers.Serializer):
     City = serializers.CharField(source='City.Name')
     CityID = serializers.CharField(source='City.id')
     Province = serializers.CharField(source='City.Province.Name')
+
+class MayorInfoSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    FullName = serializers.CharField()
+    Email = serializers.EmailField()
+
