@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from Authentication.models import User
 from .models import Provinces, Cities, MayorCities
 from Authentication.serializers import UserSerializer, UserIDSerializer
-from .serializers import ProvinceSerializer, CitySerializer, MayorCitySerializer
+from .serializers import ProvinceSerializer, CitySerializer, MayorCitySerializer, MayorInfoSerializer
 import jwt, datetime
 
 # Create your views here.
@@ -258,3 +258,51 @@ class RemoveMayorCity(APIView):
             raise AuthenticationFailed('Mayor city does not exist')
         mayorcity.delete()
         return Response({'success': 'Mayor city deleted'})
+
+class ProvinceMayors(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        serializer = UserSerializer(user)
+        if serializer.data['Type']!= 'Admin':
+            raise AuthenticationFailed("You are Not Admin!")
+
+        mayorcity = MayorCities.objects.filter(City__Province__id=request.data['ProvinceID']).values_list('User__id', flat=True)
+        mayors = User.objects.filter(id__in=mayorcity, Type='Mayor').all()
+        serializer = MayorInfoSerializer(mayors, many=True)
+        return Response(serializer.data)
+
+class CityMayors(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        serializer = UserSerializer(user)
+        if serializer.data['Type']!= 'Admin':
+            raise AuthenticationFailed("You are Not Admin!")
+
+        mayorcity = MayorCities.objects.filter(City__id=request.data['CityID']).values_list('User__id', flat=True)
+        mayors = User.objects.filter(id__in=mayorcity, Type='Mayor').all()
+        serializer = MayorInfoSerializer(mayors, many=True)
+        return Response(serializer.data)
