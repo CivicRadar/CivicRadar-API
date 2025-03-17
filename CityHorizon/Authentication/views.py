@@ -26,7 +26,7 @@ class SignUp(APIView):
         email = request.data['Email']
         Typeof = 'Citizen'
 
-        if User.objects.filter(Email=email, Type=Typeof).first() is None:
+        if User.objects.filter(Email=email).first() is None:
             # ایجاد توکن تأیید ایمیل
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
 
