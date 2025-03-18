@@ -31,7 +31,7 @@ class SignUp(APIView):
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
 
             # هدایت کاربر به فرانت‌اند React در localhost:5173
-            frontend_url = f'http://localhost:5173/verifyemail?token={token}'
+            frontend_url = f'{config("BASE_HTTP")}://{config("BASE_URL")}/verifyemail?token={token}'
 
             # ایجاد کاربر
             user = User(FullName=request.data['FullName'], Email=email, Type=Typeof)
@@ -95,7 +95,7 @@ class Login(APIView):
             token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
 
             response = Response()
-            response.set_cookie(key='jwt', value=token, httponly=True, samesite='None', secure=config('COOKIE_SECURE', cast=bool))
+            response.set_cookie(key='jwt', value=token, httponly=True, samesite='None', secure=True)
             response.data = {'jwt': token}
             return response
         raise AuthenticationFailed('your email or password is incorrect')
@@ -139,7 +139,7 @@ class RequestPasswordReset(APIView):
             token = PasswordResetTokenGenerator().make_token(user)
 
             # Generate the frontend URL with uidb64 and token
-            absurl = f'http://127.0.0.1:8000/auth/password-reset/{ui64}/{token}/'
+            absurl = f'{config("BASE_HTTP")}://{config("BASE_URL")}/auth/password-reset/{ui64}/{token}/'
             #
             from django.template import Template, Context
             user_name = user.FullName  # Replace with actual user name retrieval logic
