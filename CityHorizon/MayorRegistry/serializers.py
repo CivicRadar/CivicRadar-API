@@ -37,7 +37,7 @@ class MayorComplexSerializer(serializers.ModelSerializer):
     maximum_monthly_report_check = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['FullName', 'Email', 'LastCooperation', 'monthly_report_check', 'monthly_report_check_percentage', 'maximum_monthly_report_check', 'cities']
+        fields = ['id', 'FullName', 'Email', 'LastCooperation', 'monthly_report_check', 'monthly_report_check_percentage', 'maximum_monthly_report_check', 'cities']
 
     def get_monthly_report_check(self, obj):
         now = datetime.datetime.now()
