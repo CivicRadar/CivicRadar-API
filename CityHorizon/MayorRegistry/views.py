@@ -28,19 +28,25 @@ class Add(APIView):
         serializer = UserSerializer(user)
         if serializer.data['Type']!= 'Admin':
             raise AuthenticationFailed("You are Not Admin!")
-        city = Cities.objects.filter(id=request.data['CityID']).first()
         request.data['Type']='Mayor'
+        myset = set()
+        for city in request.data['cities']:
+            myset.add(city['id'])
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         mayor = User.objects.filter(Email=request.data['Email']).first()
-        mayorcity = MayorCities.objects.filter(User=mayor, City=city).first()
-        if mayorcity is None:
+        for num in myset:
+            city = Cities.objects.filter(id=num).first()
             mayorcity = MayorCities(User=mayor, City=city)
             mayorcity.save()
-            return Response({'success': 'Mayor city added!'})
-        raise AuthenticationFailed('Only mayor added!')
-        # return Response(serializer.data)
+        return Response({'success': 'Mayor cities added!'})
+        # mayorcity = MayorCities.objects.filter(User=mayor, City=city).first()
+        # if mayorcity is None:
+        #     mayorcity = MayorCities(User=mayor, City=city)
+        #     mayorcity.save()
+        #     return Response({'success': 'Mayor city added!'})
+        # raise AuthenticationFailed('Only mayor added!')
 
 class List(APIView):
     def get(self, request):
