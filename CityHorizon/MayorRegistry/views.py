@@ -93,7 +93,8 @@ class Update(APIView):
             raise AuthenticationFailed("Mayor not found!")
         mayor.Email = request.data['Email']
         mayor.FullName = request.data['FullName']
-        mayor.set_password(request.data['Password'])
+        if len(request.data['Password']) > 0:
+            mayor.set_password(request.data['Password'])
         mayor.save()
         serializer2 = UserSerializer(mayor)
         return Response(serializer2.data)
