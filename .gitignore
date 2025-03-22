@@ -133,6 +133,7 @@ celerybeat.pid
 
 # Environments
 .venv
+commit.marker
 env/
 venv/
 ENV/
