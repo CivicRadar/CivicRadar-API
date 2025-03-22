@@ -63,3 +63,8 @@ class SetNewPasswordSerializer(serializers.Serializer):
             return attrs
         except:
             raise AuthenticationFailed('The reset link is invalid')
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['FullName', 'Email', 'Type', 'Picture']
