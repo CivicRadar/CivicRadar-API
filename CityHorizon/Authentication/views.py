@@ -13,7 +13,7 @@ from decouple import config
 from rest_framework import generics
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
-from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer
+from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, ProfileSerializer
 from rest_framework.response import Response
 from .models import User
 from django.core import signing
@@ -126,7 +126,28 @@ class Profile(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
 
-        serializer = UserSerializer(user)
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)
+
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        user.FullName = request.data['FullName']
+        user.Picture = request.data['Picture']
+        user.save()
+        serializer = ProfileSerializer(user)
         return Response(serializer.data)
 
 class RequestPasswordReset(APIView):
