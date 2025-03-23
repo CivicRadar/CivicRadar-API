@@ -17,19 +17,27 @@ class MayorCities(models.Model):
     class Meta:
         unique_together = ('User', 'City')
 
-class CityReport(models.Model):
+class CityProblem(models.Model):
+    problem_type = [
+        ('Lighting', 'Lighting'),
+        ('Garbage', 'Garbage'),
+        ('Street', 'Street'),
+    ]
+
     City = models.ForeignKey(Cities, on_delete=models.CASCADE)
     Information = models.TextField()
     Reporter = models.ForeignKey(User, on_delete=models.CASCADE)
+    Type = models.CharField(choices=problem_type, max_length=20)
+    Picture = models.ImageField(upload_to='CivicProblem_Pictures/', null=True, blank=True)
     DateTime = models.DateTimeField(auto_now_add=True)
 
-class CityReportProsecute(models.Model):
+class CityProblemProsecute(models.Model):
     status_type = [
         ('examination', 'examination'),
         ('solved','solved'),
     ]
 
-    CityReport = models.ForeignKey(CityReport, on_delete=models.CASCADE)
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
     Prosecuter = models.ForeignKey(User, on_delete=models.CASCADE)
     Status = models.CharField(choices=status_type, max_length=20)
     DateTime = models.DateTimeField(auto_now=True)
