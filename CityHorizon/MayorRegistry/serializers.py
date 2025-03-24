@@ -2,8 +2,7 @@ from datetime import timedelta
 
 from django.db.models import Count, Max
 from rest_framework import serializers
-from .models import Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities
-from Authentication.models import User
+from Authentication.models import Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities, User
 import datetime
 
 class ProvinceSerializer(serializers.ModelSerializer):

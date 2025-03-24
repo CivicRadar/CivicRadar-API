@@ -39,6 +39,19 @@ if exist "%markerFile%" (
         REM Activate the virtual environment (if applicable)
         call ..\venv\Scripts\activate
 
+        for /r %%i in (migrations) do (
+            for %%f in ("%%i\*initial*.py") do (
+                set "appPath=%%i"
+                set "appName=!appPath:~3!"
+                for %%a in ("!appName!\..") do (
+                    set "appName=%%~nxa"
+                )
+                python manage.py migrate !appName! zero
+            )
+        )
+
+        echo Unapplied all migrations
+
         REM Find and delete initial migration files
         for /r %%i in (migrations) do (
             for %%f in ("%%i\*initial*.py") do (
@@ -58,18 +71,6 @@ if exist "%markerFile%" (
         python manage.py makemigrations
         echo Migrations have been created.
 
-        for /r %%i in (migrations) do (
-            for %%f in ("%%i\*initial*.py") do (
-                set "appPath=%%i"
-                set "appName=!appPath:~3!"
-                for %%a in ("!appName!\..") do (
-                    set "appName=%%~nxa"
-                )
-                python manage.py migrate !appName! zero
-            )
-        )
-
-        echo Unapplied all migrations
         python manage.py migrate
         echo Migrated to PostgreSQL
         python manage.py create_objects
@@ -102,6 +103,19 @@ if exist "%markerFile%" (
     REM Activate the virtual environment (if applicable)
     call ..\venv\Scripts\activate
 
+    for /r %%i in (migrations) do (
+        for %%f in ("%%i\*initial*.py") do (
+            set "appPath=%%i"
+            set "appName=!appPath:~3!"
+            for %%a in ("!appName!\..") do (
+                set "appName=%%~nxa"
+            )
+            python manage.py migrate !appName! zero
+        )
+    )
+
+    echo Unapplied all migrations
+
     REM Find and delete initial migration files
     for /r %%i in (migrations) do (
         for %%f in ("%%i\*initial*.py") do (
@@ -121,18 +135,6 @@ if exist "%markerFile%" (
     python manage.py makemigrations
     echo Migrations have been created.
 
-    for /r %%i in (migrations) do (
-        for %%f in ("%%i\*initial*.py") do (
-            set "appPath=%%i"
-            set "appName=!appPath:~3!"
-            for %%a in ("!appName!\..") do (
-                set "appName=%%~nxa"
-            )
-            python manage.py migrate !appName! zero
-        )
-    )
-
-    echo Unapplied all migrations
     python manage.py migrate
     echo Migrated to PostgreSQL
     python manage.py create_objects
