@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from MayorRegistry.models import Provinces, Cities
+from Authentication.models import Provinces, Cities
 
 class Command(BaseCommand):
     help = 'Create objects'

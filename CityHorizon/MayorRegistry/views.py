@@ -3,8 +3,7 @@ from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from Authentication.models import User
-from .models import Provinces, Cities, MayorCities
+from Authentication.models import User, Provinces, Cities, MayorCities
 from Authentication.serializers import UserSerializer, UserIDSerializer
 from .serializers import ProvinceSerializer, CitySerializer, MayorCitySerializer, MayorInfoSerializer, MayorComplexSerializer
 import jwt, datetime
@@ -140,7 +139,7 @@ class ProvinceList(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
         serializer = UserSerializer(user)
-        if serializer.data['Type']!= 'Admin':
+        if serializer.data['Type']!= 'Admin' and serializer.data['Type']!= 'Citizen':
             raise AuthenticationFailed("You are Not Admin!")
 
         myprovinces = Provinces.objects.all()
@@ -163,7 +162,7 @@ class CityList(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
         serializer = UserSerializer(user)
-        if serializer.data['Type']!= 'Admin':
+        if serializer.data['Type']!= 'Admin' and serializer.data['Type']!= 'Citizen':
             raise AuthenticationFailed("You are Not Admin!")
 
         myprovince = Provinces.objects.filter(id=request.data['ProvinceID']).first()
