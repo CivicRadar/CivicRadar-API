@@ -1,7 +1,6 @@
 from django.contrib.staticfiles.views import serve
 from django.shortcuts import render
 from django.conf import settings
-from google.protobuf.proto import serialize
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
