@@ -48,6 +48,7 @@ class CityProblem(models.Model):
     Reporter = models.ForeignKey(User, on_delete=models.CASCADE)
     Type = models.CharField(choices=problem_type, max_length=20)
     Picture = models.ImageField(upload_to='CivicProblem_Pictures/', null=True, blank=True)
+    Video = models.FileField(upload_to='CivicProblem_Videos', null=True, blank=True)
     DateTime = models.DateTimeField(auto_now_add=True)
 
 class ReportCitizen(models.Model):
