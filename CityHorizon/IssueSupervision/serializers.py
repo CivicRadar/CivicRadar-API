@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db.models import Count, Max
 from rest_framework import serializers
-from Authentication.models import User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities
+from Authentication.models import User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities, MayorNote
 import datetime
 
 class CityProblemSerializer(serializers.ModelSerializer):
@@ -21,3 +21,8 @@ class ReportCitizenSerializer(serializers.Serializer):
     DateTime = serializers.DateTimeField(source='Reported.DateTime')
     CtizenName = serializers.CharField(source='Reported.Reporter.FullName')
     CitizenPicture = serializers.ImageField(source='Reported.Reporter.Picture')
+
+class NoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MayorNote
+        fields = '__all__'

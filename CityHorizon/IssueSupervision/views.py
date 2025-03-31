@@ -5,7 +5,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote
-from .serializers import CityProblemSerializer, ReportCitizenSerializer
+from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer
 import jwt, datetime
 
 class CitizenReportProblem(APIView):
@@ -126,26 +126,105 @@ class MayorCityReports(APIView):
         serializer = CityProblemSerializer(problems, many=True)
         return Response(serializer.data)
 
-# class MayorAddNote(APIView):
-#     def post(self, request):
-#         # Mayor can add a note for the report
-#         token = request.COOKIES.get('jwt')
-#
-#         if not token:
-#             raise AuthenticationFailed("Unauthenticated!")
-#
-#         try:
-#             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-#         except jwt.ExpiredSignatureError:
-#             raise AuthenticationFailed("Expired token!")
-#
-#         user = User.objects.filter(id=payload['id'], Type='Mayor').first()
-#         if user is None:
-#             raise AuthenticationFailed("User not found!")
-#
-#         CityProblem = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
-#
-#         note = MayorNote(NoteOwner=user, Information=request.data['Information'])
-#
-# class MayorUpdateNote(APIView):
-#     def post(self, request):
+class MayorNotes(APIView):
+    def get(self, request):
+        # Mayor can see all his/her notes
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        notes = MayorNote.objects.filter(NoteOwner=user).all()
+        serializer = NoteSerializer(notes, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        # Mayor can add a note for the report
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        cityproblem = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
+        if cityproblem is None:
+            raise AuthenticationFailed("Problem not found!")
+
+        mayorcities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+        if cityproblem.City.id not in mayorcities:
+            raise AuthenticationFailed("This Problem does not belong to you!")
+
+        invalidnote = MayorNote.objects.filter(NoteOwner=user, CityProblem=cityproblem).first()
+        if invalidnote is not None:
+            raise AuthenticationFailed("This Note already exists!")
+
+        note = MayorNote(NoteOwner=user, Information=request.data['Information'], CityProblem=cityproblem)
+        note.save()
+        serializer = NoteSerializer(note)
+        return Response(serializer.data)
+
+    def put(self, request):
+        # Mayor can update his/her note for the report
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        note = MayorNote.objects.filter(id=request.data['NoteID'], NoteOwner=user).first()
+        if note is None:
+            raise AuthenticationFailed("Note not found!")
+
+        note.Information = request.data['Information']
+        note.save()
+        serializer = NoteSerializer(note)
+        return Response(serializer.data)
+
+    def delete(self, request):
+        # Mayor can update his/her note for the report
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        note = MayorNote.objects.filter(id=request.data['NoteID'], NoteOwner=user).first()
+        if note is None:
+            raise AuthenticationFailed("Note not found!")
+
+        note.delete()
+
+        return Response({'success': 'note deleted successfully'})
