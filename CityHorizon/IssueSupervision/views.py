@@ -4,7 +4,7 @@ from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from Authentication.models import CityProblem, ReportCitizen, MayorCities, User, Cities
+from Authentication.models import CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote
 from .serializers import CityProblemSerializer, ReportCitizenSerializer
 import jwt, datetime
 
@@ -125,3 +125,27 @@ class MayorCityReports(APIView):
         problems = CityProblem.objects.filter(City__id__in=cities).all()
         serializer = CityProblemSerializer(problems, many=True)
         return Response(serializer.data)
+
+# class MayorAddNote(APIView):
+#     def post(self, request):
+#         # Mayor can add a note for the report
+#         token = request.COOKIES.get('jwt')
+#
+#         if not token:
+#             raise AuthenticationFailed("Unauthenticated!")
+#
+#         try:
+#             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+#         except jwt.ExpiredSignatureError:
+#             raise AuthenticationFailed("Expired token!")
+#
+#         user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+#         if user is None:
+#             raise AuthenticationFailed("User not found!")
+#
+#         CityProblem = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
+#
+#         note = MayorNote(NoteOwner=user, Information=request.data['Information'])
+#
+# class MayorUpdateNote(APIView):
+#     def post(self, request):
