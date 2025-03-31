@@ -60,11 +60,19 @@ class ReportCitizen(models.Model):
 
 class CityProblemProsecute(models.Model):
     status_type = [
-        ('examination', 'examination'),
-        ('solved','solved'),
+        ('PendingReview', 'PendingReview'),
+        ('UnderConsideration','UnderConsideration'),
+        ('IssueResolved','IssueResolved')
     ]
 
     CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
     Prosecuter = models.ForeignKey(User, on_delete=models.CASCADE)
     Status = models.CharField(choices=status_type, max_length=20)
     DateTime = models.DateTimeField(auto_now=True)
+
+class MayorNote(models.Model):
+    NoteOwner = models.ForeignKey(User, on_delete=models.CASCADE)
+    Information = models.CharField(max_length=100)
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
+    class Meta:
+        unique_together = ('NoteOwner', 'CityProblem')
