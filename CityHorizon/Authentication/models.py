@@ -44,7 +44,7 @@ class CityProblem(models.Model):
     ]
 
     City = models.ForeignKey(Cities, on_delete=models.CASCADE)
-    Information = models.TextField()
+    Information = models.CharField(max_length=200)
     Reporter = models.ForeignKey(User, on_delete=models.CASCADE)
     Type = models.CharField(choices=problem_type, max_length=20)
     Picture = models.ImageField(upload_to='CivicProblem_Pictures/', null=True, blank=True)
@@ -74,5 +74,3 @@ class MayorNote(models.Model):
     NoteOwner = models.ForeignKey(User, on_delete=models.CASCADE)
     Information = models.CharField(max_length=100)
     CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
-    class Meta:
-        unique_together = ('NoteOwner', 'CityProblem')

@@ -143,7 +143,11 @@ class MayorNotes(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
 
-        notes = MayorNote.objects.filter(NoteOwner=user).all()
+        cprob = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
+        if not cprob:
+            raise AuthenticationFailed("City Problem not found!")
+
+        notes = MayorNote.objects.filter(NoteOwner=user, CityProblem=cprob).all()
         serializer = NoteSerializer(notes, many=True)
         return Response(serializer.data)
 
@@ -170,10 +174,6 @@ class MayorNotes(APIView):
         mayorcities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
         if cityproblem.City.id not in mayorcities:
             raise AuthenticationFailed("This Problem does not belong to you!")
-
-        invalidnote = MayorNote.objects.filter(NoteOwner=user, CityProblem=cityproblem).first()
-        if invalidnote is not None:
-            raise AuthenticationFailed("This Note already exists!")
 
         note = MayorNote(NoteOwner=user, Information=request.data['Information'], CityProblem=cityproblem)
         note.save()
