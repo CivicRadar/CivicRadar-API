@@ -121,7 +121,7 @@ class MayorCityReports(APIView):
         user = User.objects.filter(id=payload['id'], Type='Mayor').first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        cities = MayorCities.objects.filter(User=user).values_list('id', flat=True)
+        cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
         problems = CityProblem.objects.filter(City__id__in=cities).all()
         serializer = CityProblemSerializer(problems, many=True)
         return Response(serializer.data)
