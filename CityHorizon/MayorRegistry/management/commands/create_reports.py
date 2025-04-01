@@ -38,6 +38,24 @@ class Command(BaseCommand):
             cprob.save()
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
+            cprob = CityProblem(City=c1, Information='There is a problem in the intersection', Reporter=citizen,
+                                Type='Lighting')
+            cprob.Picture.save('1.png', django_file, save=False)
+        with open(video_path, 'rb') as vid_file:
+            django_file = File(vid_file)
+            cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.save()
+        with open(image_path, 'rb') as img_file:
+            django_file = File(img_file)
+            cprob = CityProblem(City=c2, Information='There is a problem in the street', Reporter=citizen,
+                                Type='Street')
+            cprob.Picture.save('1.png', django_file, save=False)
+        with open(video_path, 'rb') as vid_file:
+            django_file = File(vid_file)
+            cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.save()
+        with open(image_path, 'rb') as img_file:
+            django_file = File(img_file)
             cprob = CityProblem(City=c3, Information='There is a problem in the intersection', Reporter=citizen,
                                 Type='Lighting')
             cprob.Picture.save('1.png', django_file, save=False)
