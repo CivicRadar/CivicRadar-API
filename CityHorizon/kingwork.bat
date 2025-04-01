@@ -75,6 +75,7 @@ if exist "%markerFile%" (
         echo Migrated to PostgreSQL
         python manage.py create_objects
         python manage.py create_users
+        python manage.py create_reports
 
         REM Update marker file with new hash
         echo|set /p="!latestHash!" > "%markerFile%"
@@ -139,6 +140,7 @@ if exist "%markerFile%" (
     echo Migrated to PostgreSQL
     python manage.py create_objects
     python manage.py create_users
+    python manage.py create_reports
 
     REM Create marker file with current hash
     echo|set /p="!latestHash!" > "%markerFile%"

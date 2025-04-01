@@ -5,10 +5,18 @@ from rest_framework import serializers
 from Authentication.models import User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities, MayorNote
 import datetime
 
-class CityProblemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CityProblem
-        fields = '__all__'
+class CityProblemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Information = serializers.CharField()
+    Type = serializers.CharField()
+    Picture = serializers.ImageField()
+    Video = serializers.FileField()
+    DateTime = serializers.DateTimeField()
+    CityID = serializers.IntegerField(source='City.id')
+    CityName = serializers.CharField(source='City.Name')
+    ProvinceName = serializers.CharField(source='City.Province.Name')
+    ReporterID = serializers.IntegerField(source='Reporter.id')
+    ReporterName = serializers.CharField(source='Reporter.FullName')
 
 class ReportCitizenSerializer(serializers.Serializer):
     id = serializers.IntegerField()
