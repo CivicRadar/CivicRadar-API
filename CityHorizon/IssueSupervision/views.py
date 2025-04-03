@@ -143,12 +143,17 @@ class MayorNotes(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
 
-        cprob = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
-        if not cprob:
-            raise AuthenticationFailed("City Problem not found!")
+        CityProblemID = request.query_params.get('CityProblemID')
+        if not CityProblemID:
+            return Response({"error": "CityProblemID is required"}, status=400)
 
-        notes = MayorNote.objects.filter(NoteOwner=user, CityProblem=cprob).all()
-        serializer = NoteSerializer(notes, many=True)
+        try:
+            cprob = CityProblem.objects.get(id=CityProblemID)
+        except CityProblem.DoesNotExist:
+            return Response({"error": "City Problem not found!"}, status=404)
+
+        notes = MayorNote.objects.filter(CityProblem=cprob).all()
+        serializer = NoteSerializer(notes, many=True, context={'userid': user.id})
         return Response(serializer.data)
 
     def post(self, request):
@@ -177,7 +182,7 @@ class MayorNotes(APIView):
 
         note = MayorNote(NoteOwner=user, Information=request.data['Information'], CityProblem=cityproblem)
         note.save()
-        serializer = NoteSerializer(note)
+        serializer = NoteSerializer(note, context={'userid': user.id})
         return Response(serializer.data)
 
     def put(self, request):
@@ -202,7 +207,7 @@ class MayorNotes(APIView):
 
         note.Information = request.data['Information']
         note.save()
-        serializer = NoteSerializer(note)
+        serializer = NoteSerializer(note, context={'userid': user.id})
         return Response(serializer.data)
 
     def delete(self, request):

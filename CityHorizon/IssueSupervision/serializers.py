@@ -30,7 +30,19 @@ class ReportCitizenSerializer(serializers.Serializer):
     CtizenName = serializers.CharField(source='Reported.Reporter.FullName')
     CitizenPicture = serializers.ImageField(source='Reported.Reporter.Picture')
 
-class NoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MayorNote
-        fields = '__all__'
+class NoteSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Information = serializers.CharField()
+    NoteOwner = serializers.IntegerField(source='NoteOwner.id')
+    NoteOwnerName = serializers.CharField(source='NoteOwner.FullName')
+    NoteOwnerEmail = serializers.CharField(source='NoteOwner.Email')
+    CityProblem = serializers.IntegerField(source='CityProblem.id')
+    PutDeletePermission = serializers.SerializerMethodField()
+
+    def get_PutDeletePermission(self, obj):
+        userid = self.context.get('userid', None)
+        if userid:
+            if userid == obj.NoteOwner.id:
+                return True
+            return False
+        return None

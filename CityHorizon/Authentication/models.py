@@ -72,5 +72,5 @@ class CityProblemProsecute(models.Model):
 
 class MayorNote(models.Model):
     NoteOwner = models.ForeignKey(User, on_delete=models.CASCADE)
-    Information = models.CharField(max_length=100)
+    Information = models.CharField(max_length=1000)
     CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
