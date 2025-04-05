@@ -17,6 +17,9 @@ class CityProblemSerializer(serializers.Serializer):
     ProvinceName = serializers.CharField(source='City.Province.Name')
     ReporterID = serializers.IntegerField(source='Reporter.id')
     ReporterName = serializers.CharField(source='Reporter.FullName')
+    Longitude = serializers.FloatField()
+    Latitude = serializers.FloatField()
+    FullAdress = serializers.CharField()
 
 class ReportCitizenSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -36,6 +39,7 @@ class NoteSerializer(serializers.Serializer):
     NoteOwner = serializers.IntegerField(source='NoteOwner.id')
     NoteOwnerName = serializers.CharField(source='NoteOwner.FullName')
     NoteOwnerEmail = serializers.CharField(source='NoteOwner.Email')
+    NoteOwnerPicture = serializers.ImageField(source='NoteOwner.Picture')
     CityProblem = serializers.IntegerField(source='CityProblem.id')
     PutDeletePermission = serializers.SerializerMethodField()
 

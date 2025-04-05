@@ -28,7 +28,8 @@ class CitizenReportProblem(APIView):
         if city is None:
             raise AuthenticationFailed("City not found!")
         problem = CityProblem(City=city, Information=request.data['Information'], Reporter=user, Type=request.data['Type'],
-                              Picture=request.data['Picture'], Video=request.data['Video'])
+                              Picture=request.data['Picture'], Video=request.data['Video'], Longitude=request.data['Longitude'], Latitude=request.data['Latitude'], FullAdress=request.data['FullAdress'])
+
         problem.save()
         serializer = CityProblemSerializer(problem)
         return Response(serializer.data)

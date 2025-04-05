@@ -50,6 +50,9 @@ class CityProblem(models.Model):
     Picture = models.ImageField(upload_to='CivicProblem_Pictures/', null=True, blank=True)
     Video = models.FileField(upload_to='CivicProblem_Videos', null=True, blank=True)
     DateTime = models.DateTimeField(auto_now_add=True)
+    Longitude = models.FloatField()
+    Latitude = models.FloatField()
+    FullAdress = models.CharField(max_length=300)
 
 class ReportCitizen(models.Model):
     Reporter = models.ForeignKey(User, on_delete=models.CASCADE)

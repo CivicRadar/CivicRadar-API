@@ -40,12 +40,6 @@ class Add(APIView):
             mayorcity = MayorCities(User=mayor, City=city)
             mayorcity.save()
         return Response({'success': 'Mayor cities added!'})
-        # mayorcity = MayorCities.objects.filter(User=mayor, City=city).first()
-        # if mayorcity is None:
-        #     mayorcity = MayorCities(User=mayor, City=city)
-        #     mayorcity.save()
-        #     return Response({'success': 'Mayor city added!'})
-        # raise AuthenticationFailed('Only mayor added!')
 
 class List(APIView):
     def get(self, request):

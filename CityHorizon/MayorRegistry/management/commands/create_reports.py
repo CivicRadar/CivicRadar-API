@@ -21,7 +21,7 @@ class Command(BaseCommand):
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
             cprob = CityProblem(City=c1, Information='There is a problem in the intersection', Reporter=citizen,
-                                Type='Lighting')
+                                Type='Lighting', Longitude=2.33234766, Latitude=43, FullAdress='خیابان میزرایی کوچه سوم غربی')
             cprob.Picture.save('1.png', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
@@ -30,7 +30,7 @@ class Command(BaseCommand):
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
             cprob = CityProblem(City=c2, Information='There is a problem in the street', Reporter=citizen,
-                                Type='Street')
+                                Type='Street', Longitude=100, Latitude=97.1, FullAdress='بزرگراه شهید مدنی')
             cprob.Picture.save('1.png', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
             cprob = CityProblem(City=c1, Information='There is a problem in the intersection', Reporter=citizen,
-                                Type='Lighting')
+                                Type='Lighting', Longitude=2, Latitude=4, FullAdress='آزادراه حجازی')
             cprob.Picture.save('1.png', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
@@ -48,7 +48,7 @@ class Command(BaseCommand):
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
             cprob = CityProblem(City=c2, Information='There is a problem in the street', Reporter=citizen,
-                                Type='Street')
+                                Type='Street', Longitude=2.33234766, Latitude=43, FullAdress='کمربندی شمالی جنب فروشگاه افق کوروش')
             cprob.Picture.save('1.png', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
@@ -57,7 +57,7 @@ class Command(BaseCommand):
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
             cprob = CityProblem(City=c3, Information='There is a problem in the intersection', Reporter=citizen,
-                                Type='Lighting')
+                                Type='Lighting', Longitude=0, Latitude=0, FullAdress='فلکه گوهردشت بلوار میرزایی پور')
             cprob.Picture.save('1.png', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
