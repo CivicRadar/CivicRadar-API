@@ -96,6 +96,9 @@ class Login(APIView):
 
             response = Response()
             response.set_cookie(key='jwt', value=token, httponly=True, samesite='None', secure=True)
+            if user.Theme is not None:
+                response.set_cookie(key='theme', value=user.Theme)
+
             response.data = {'jwt': token}
             return response
         raise AuthenticationFailed('your email or password is incorrect')
