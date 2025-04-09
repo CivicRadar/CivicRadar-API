@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
@@ -76,9 +77,12 @@ The Shahrsanj Team
 
 class Login(APIView):
     def post(self, request):
-        email = request.data['Email']
-        password = request.data['Password']
-        typeof = request.data['Type']
+        try:
+            email = request.data['Email']
+            password = request.data['Password']
+            typeof = request.data['Type']
+        except KeyError:
+            return HttpResponseBadRequest("needs Email, Password and Type fields in request data")
 
         user = User.objects.filter(Email=email, Type=typeof).first()
 
@@ -96,6 +100,9 @@ class Login(APIView):
 
             response = Response()
             response.set_cookie(key='jwt', value=token, httponly=True, samesite='None', secure=True)
+            if user.Theme is not None:
+                response.set_cookie(key='theme', value=user.Theme)
+
             response.data = {'jwt': token}
             return response
         raise AuthenticationFailed('your email or password is incorrect')
@@ -109,6 +116,23 @@ class Logout(APIView):
         }
 
         return response
+
+    def delete(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        user.delete()
+        return Response({'message': 'Your account has been deleted.'})
 
 class Profile(APIView):
     def get(self, request):
@@ -243,3 +267,22 @@ class EmailVerification(APIView):
             raise AuthenticationFailed('bad signature')
         except User.DoesNotExist:
             raise AuthenticationFailed('user not found')
+
+class SetTheme(APIView):
+    def post(self, request):
+        try:
+            token = request.COOKIES.get('jwt')
+            new_theme = request.data['theme']
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            user = User.objects.filter(id=payload['id']).first()
+            if user is None:
+                raise AuthenticationFailed("User not found!")
+            user.Theme = new_theme
+            user.save()
+            response = Response({"success": "theme changed successfully"})
+            response.set_cookie(key="theme", value=user.Theme)
+            return response
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+        except KeyError:
+            return HttpResponseBadRequest("needs theme field in request data")

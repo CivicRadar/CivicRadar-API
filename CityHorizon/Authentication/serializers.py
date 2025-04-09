@@ -65,6 +65,16 @@ class SetNewPasswordSerializer(serializers.Serializer):
             raise AuthenticationFailed('The reset link is invalid')
 
 class ProfileSerializer(serializers.ModelSerializer):
+    user_type = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['FullName', 'Email', 'Type', 'Picture']
+        fields = ['FullName', 'Email', 'user_type', 'Picture']
+
+    def get_user_type(self, obj):
+        if obj.Type == 'Citizen':
+            return 'شهروند'
+        elif obj.Type == 'Mayor':
+            return 'شهردار'
+        elif obj.Type == 'Admin':
+            return 'ادمین'
+        return None
