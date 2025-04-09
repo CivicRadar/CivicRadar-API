@@ -110,6 +110,23 @@ class Logout(APIView):
 
         return response
 
+    def delete(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        user.delete()
+        return Response({'message': 'Your account has been deleted.'})
+
 class Profile(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
