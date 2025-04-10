@@ -169,7 +169,8 @@ class Profile(APIView):
             raise AuthenticationFailed("User not found!")
 
         user.FullName = request.data['FullName']
-        user.Picture = request.data['Picture']
+        if request.data['Picture']:
+            user.Picture = request.data['Picture']
         user.save()
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
