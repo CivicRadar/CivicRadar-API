@@ -9,6 +9,11 @@ class User(AbstractUser):
         ("Citizen", "Citizen"),
     ]
 
+    account_theme = [
+        ("Light", "Light"),
+        ("dark", "dark"),
+    ]
+
     FullName = models.CharField(max_length=255)
     Email = models.EmailField(unique=True)
     Password = models.CharField(max_length=255)
@@ -16,6 +21,7 @@ class User(AbstractUser):
     LastCooperation = models.DateField(auto_now=False, auto_now_add=False, default=None, null=True, blank=True)
     Verified = models.BooleanField(default=False)
     Picture = models.ImageField(upload_to="Profile_Pictures", null=True, blank=True)
+    Theme = models.CharField(max_length=10, choices=account_theme, null=True)
     username = None
     USERNAME_FIELD = 'Email'
     REQUIRED_FIELDS = []
