@@ -39,30 +39,31 @@ class ResetPasswordRequestSerializer(serializers.Serializer):
 
 class SetNewPasswordSerializer(serializers.Serializer):
     Password = serializers.CharField(min_length=3, write_only=True)
+    ConfirmPassword = serializers.CharField(min_length=3, write_only=True)
     token = serializers.CharField(min_length=1, write_only=True)
     ui64 = serializers.CharField(min_length=1, write_only=True)
 
     class Meta:
-        fields = ['Password', 'token', 'ui64']
+        fields = ['Password', 'ConfirmPassword', 'token', 'ui64']
 
     def validate(self, attrs):
-        try:
-            password = attrs.pop('Password')
-            token = attrs.pop('token')
-            ui64 = attrs.pop('ui64')
+        password = attrs.pop('Password')
+        token = attrs.pop('token')
+        ui64 = attrs.pop('ui64')
+        confpas = attrs.pop('ConfirmPassword')
+        if password != confpas:
+            raise AuthenticationFailed('Passwords do not match')
 
-            id=force_str(urlsafe_base64_decode(ui64))
-            user = User.objects.get(id=id)
+        id=force_str(urlsafe_base64_decode(ui64))
+        user = User.objects.get(id=id)
 
-            if not PasswordResetTokenGenerator().check_token(user, token):
-                raise AuthenticationFailed('The reset link is invalid')
-
-            user.set_password(password)
-            user.save()
-
-            return attrs
-        except:
+        if not PasswordResetTokenGenerator().check_token(user, token):
             raise AuthenticationFailed('The reset link is invalid')
+
+        user.set_password(password)
+        user.save()
+
+        return attrs
 
 class ProfileSerializer(serializers.ModelSerializer):
     user_type = serializers.SerializerMethodField()
