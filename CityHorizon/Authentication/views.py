@@ -72,7 +72,7 @@ The Shahrsanj Team
 
             return Response({'success': 'We have sent you a link to verify your email address'})
         else:
-            raise AuthenticationFailed('user with this Email already exists.')
+            return HttpResponseBadRequest('user with this Email already exists.')
 
 
 class Login(APIView):
