@@ -1,9 +1,10 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.core import signing
 from django.conf import settings
 from rest_framework.test import APIClient
 from Authentication.models import User
 from unittest.mock import patch
+from decouple import config
 
 class SignUpTests(TestCase):
     def setUp(self):
@@ -19,6 +20,7 @@ class SignUpTests(TestCase):
     def tearDown(self):
         User.objects.all().delete()
 
+    @tag('unstable')
     @patch('Authentication.utils.Util.send_email')  # Mock email sending
     def test_successful_signup(self, mock_send_email):
         response = self.client.post(self.url, self.valid_data, format='json')
@@ -33,12 +35,11 @@ class SignUpTests(TestCase):
         self.assertEqual(user.Type, 'Citizen')
         self.assertTrue(user.check_password('securepassword123'))
         
-        # # Check verification token
-        # token = signing.dumps({'email_address': 'test@example.com'}, salt="my_verification_salt")
-        # self.assertTrue(mock_send_email.called)
-        # print(mock_send_email.call_args[1])
-        # email_body = mock_send_email.call_args[1]['data']['email_body']
-        # self.assertIn(token, email_body)
+        # Check verification token
+        token = signing.dumps({'email_address': 'test@example.com'}, salt="my_verification_salt")
+        self.assertTrue(mock_send_email.called)
+        email_body = mock_send_email.call_args[0][0]['email_body']
+        self.assertIn(token, email_body)
 
     def test_duplicate_email_signup(self):
         # Create existing user first
@@ -66,20 +67,17 @@ class SignUpTests(TestCase):
             response = self.client.post(self.url, data, format='json')
             self.assertEqual(response.status_code, 400)
 
-    # @patch('Authentication.utils.Util.send_email')
-    # def test_verification_link_generation(self, mock_send_email):
-    #     with self.settings(
-    #         BASE_HTTP='https',
-    #         BASE_URL='frontend.example.com'
-    #     ):
-    #         response = self.client.post(self.url, self.valid_data, format='json')
-            
-    #         # Verify link construction
-    #         token = signing.dumps({'email_address': 'test@example.com'}, salt="my_verification_salt")
-    #         expected_url = f'https://frontend.example.com/verifyemail?token={token}'
-            
-    #         email_body = mock_send_email.call_args[1]['data']['email_body']
-    #         self.assertIn(expected_url, email_body)
+    @tag('unstable')
+    @patch('Authentication.utils.Util.send_email')
+    def test_verification_link_generation(self, mock_send_email):
+        self.client.post(self.url, self.valid_data, format='json')
+
+        # Verify link construction
+        token = signing.dumps({'email_address': 'test@example.com'}, salt="my_verification_salt")
+        expected_url = f'{config("BASE_HTTP")}://{config("BASE_URL")}/verifyemail?token={token}'
+
+        email_body = mock_send_email.call_args[0][0]['email_body']
+        self.assertIn(expected_url, email_body)
 
     # @patch('Authentication.utils.Util.send_email')
     # def test_email_template_content(self, mock_send_email):
