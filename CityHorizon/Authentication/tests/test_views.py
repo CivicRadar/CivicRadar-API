@@ -345,24 +345,26 @@ class ProfileViewTests(TestCase):
         self.expired_token = jwt.encode(self.expired_payload, settings.SECRET_KEY, algorithm='HS256')
 
     # Helper methods
-    def set_auth_cookie(self, token):
+    def __set_auth_cookie(self, token):
         self.client.cookies['jwt'] = token
-        
+
+    def __assert_unauthenticated_response(self, response, detail_value):
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], detail_value)
+
     # GET method tests
     def test_get_unauthenticated(self):
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], 'Unauthenticated!')
+        self.__assert_unauthenticated_response(response, 'Unauthenticated!')
 
-    # def test_get_expired_token(self):
-    #     self.set_auth_cookie(self.expired_token)
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(self.url)
-    #     self.assertEqual(str(cm.exception.detail), 'Expired token!')
+    def test_get_expired_token(self):
+        self.__set_auth_cookie(self.expired_token)
+        response = self.client.get(self.url)
+        self.__assert_unauthenticated_response(response, 'Expired token!')
 
     # def test_get_valid_profile(self):
-    #     self.set_auth_cookie(self.valid_token)
+    #     self.__set_auth_cookie(self.valid_token)
     #     response = self.client.get(self.url)
         
     #     self.assertEqual(response.status_code, 200)
@@ -376,13 +378,13 @@ class ProfileViewTests(TestCase):
     #     self.assertEqual(str(cm.exception.detail), 'Unauthenticated!')
 
     # def test_post_missing_required_field(self):
-    #     self.set_auth_cookie(self.valid_token)
+    #     self.__set_auth_cookie(self.valid_token)
     #     response = self.client.post(self.url, {})
     #     self.assertEqual(response.status_code, 400)
     #     self.assertIn('FullName', response.data)
 
     # def test_post_successful_update(self):
-    #     self.set_auth_cookie(self.valid_token)
+    #     self.__set_auth_cookie(self.valid_token)
     #     new_picture = SimpleUploadedFile("test.jpg", b"file_content", content_type="image/jpeg")
         
     #     response = self.client.post(self.url, {
@@ -396,7 +398,7 @@ class ProfileViewTests(TestCase):
     #     self.assertTrue(self.user.Picture.name.endswith('test.jpg'))
 
     # def test_post_partial_update(self):
-    #     self.set_auth_cookie(self.valid_token)
+    #     self.__set_auth_cookie(self.valid_token)
     #     response = self.client.post(self.url, {
     #         'FullName': 'Partial Update'
     #     })
@@ -408,7 +410,7 @@ class ProfileViewTests(TestCase):
 
     # def test_post_invalid_user(self):
     #     self.user.delete()
-    #     self.set_auth_cookie(self.valid_token)
+    #     self.__set_auth_cookie(self.valid_token)
         
     #     with self.assertRaises(AuthenticationFailed) as cm:
     #         self.client.post(self.url, {'FullName': 'New Name'})
