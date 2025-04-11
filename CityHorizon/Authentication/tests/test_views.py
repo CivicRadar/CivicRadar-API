@@ -376,11 +376,11 @@ class ProfileViewTests(TestCase):
         response = self.client.post(self.url, {'FullName': 'New Name'})
         self.__assert_unauthenticated_response(response, 'Unauthenticated!')
 
-    # def test_post_missing_required_field(self):
-    #     self.__set_auth_cookie(self.valid_token)
-    #     response = self.client.post(self.url, {})
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('FullName', response.data)
+    def test_post_missing_required_field(self):
+        self.__set_auth_cookie(self.valid_token)
+        response = self.client.post(self.url, {})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content.decode('utf-8'), "all of these keys should exist in data: ['FullName', 'Picture']")
 
     # def test_post_successful_update(self):
     #     self.__set_auth_cookie(self.valid_token)

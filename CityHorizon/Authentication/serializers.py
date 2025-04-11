@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
 from .models import User
+from .utils import Util
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -29,8 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
     def is_valid(self):
         super().is_valid()
         REQUIRED_FIELDS = ['FullName', 'Email', 'Password', 'Type']
-        if any(field not in self.data.keys() for field in REQUIRED_FIELDS):
-            raise serializers.ValidationError(f"all of these keys should exist in data: {REQUIRED_FIELDS}")
+        Util.is_contain_required_fields(self.data, REQUIRED_FIELDS)
         if User.objects.filter(Email=self.data['Email']).exists():
             raise serializers.ValidationError("user with this Email already exists.")
         return self.data
@@ -86,3 +86,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         elif obj.Type == 'Admin':
             return 'ادمین'
         return None
+
+    @override
+    def is_valid(self):
+        super().is_valid()
+        REQUIRED_FIELDS = ['FullName', 'Picture']
+        Util.is_contain_required_fields(self.data, REQUIRED_FIELDS)

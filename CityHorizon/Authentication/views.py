@@ -168,13 +168,17 @@ class Profile(APIView):
         if user is None:
             return UnAuthorizedResponse(data="User not found!")
 
-        # TODO: needs serializer
-        user.FullName = request.data['FullName']
-        if request.data['Picture']:
-            user.Picture = request.data['Picture']
-        user.save()
-        serializer = ProfileSerializer(user)
-        return Response(serializer.data)
+        profile_serializer = ProfileSerializer(data=request.data)
+        try:
+            profile_serializer.is_valid()
+            user.FullName = profile_serializer.data['FullName']
+            if profile_serializer.data['Picture']:
+                user.Picture = profile_serializer.data['Picture']
+            user.save()
+            serializer = ProfileSerializer(user)
+            return Response(serializer.data)
+        except serializers.ValidationError as e:
+            return HttpResponseBadRequest(e.detail)
 
 class RequestPasswordReset(APIView):
     def post(self, request):
