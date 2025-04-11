@@ -363,13 +363,13 @@ class ProfileViewTests(TestCase):
         response = self.client.get(self.url)
         self.__assert_unauthenticated_response(response, 'Expired token!')
 
-    # def test_get_valid_profile(self):
-    #     self.__set_auth_cookie(self.valid_token)
-    #     response = self.client.get(self.url)
-        
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(response.data['Email'], 'test@example.com')
-    #     self.assertEqual(response.data['FullName'], 'Original Name')
+    def test_get_valid_profile(self):
+        self.__set_auth_cookie(self.valid_token)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['Email'], 'test@example.com')
+        self.assertEqual(response.data['FullName'], 'Original Name')
 
     # # POST method tests
     # def test_post_unauthenticated(self):
