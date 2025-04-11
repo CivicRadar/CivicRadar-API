@@ -302,13 +302,12 @@ class LogoutViewTests(TestCase):
         self.assertEqual(response.data['message'], 'Your account has been deleted.')
         self.assertFalse(User.objects.filter(id=self.user.id).exists())
 
-    # def test_delete_nonexistent_user(self):
-    #     # Delete user first
-    #     self.user.delete()
-        
-    #     self.client.cookies['jwt'] = self.valid_token
-        
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.delete(self.url)
-        
-    #     self.assertEqual(str(cm.exception.detail), 'User not found!')
+    def test_delete_nonexistent_user(self):
+        # Delete user first
+        self.user.delete()
+
+        self.client.cookies['jwt'] = self.valid_token
+
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], 'User not found!')
