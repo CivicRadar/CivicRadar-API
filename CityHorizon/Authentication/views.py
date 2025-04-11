@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 from django.core import signing
 from CityHorizon.settings import EMAIL_HOST_USER
 from decouple import config
-from rest_framework import generics
+from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, ProfileSerializer
@@ -23,11 +23,13 @@ import jwt, datetime
 
 class SignUp(APIView):
     def post(self, request):
-        request.data['Type'] = 'Citizen'
-        email = request.data['Email']
-        Typeof = 'Citizen'
+        user_serializer = UserSerializer(data=request.data)
 
-        if User.objects.filter(Email=email).first() is None:
+        try:
+            user_serializer.is_valid()
+            user_serializer.validate(user_serializer.data)
+
+            email = user_serializer.data["Email"]
             # ایجاد توکن تأیید ایمیل
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
 
@@ -35,9 +37,7 @@ class SignUp(APIView):
             frontend_url = f'{config("BASE_HTTP")}://{config("BASE_URL")}/verifyemail?token={token}'
 
             # ایجاد کاربر
-            user = User(FullName=request.data['FullName'], Email=email, Type=Typeof)
-            user.set_password(request.data['Password'])
-            user.save()
+            user = user_serializer.create(user_serializer.data)
 
             # قالب ایمیل
             from django.template import Template, Context
@@ -71,8 +71,8 @@ The Shahrsanj Team
             Util.send_email(data)
 
             return Response({'success': 'We have sent you a link to verify your email address'})
-        else:
-            return HttpResponseBadRequest('user with this Email already exists.')
+        except serializers.ValidationError as e:
+            return HttpResponseBadRequest(e.detail)
 
 
 class Login(APIView):

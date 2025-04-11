@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.core import signing
 from django.conf import settings
 from rest_framework.test import APIClient
-from rest_framework.exceptions import AuthenticationFailed
 from Authentication.models import User
 from unittest.mock import patch
 
@@ -13,7 +12,8 @@ class SignUpTests(TestCase):
         self.valid_data = {
             'FullName': 'Test User',
             'Email': 'test@example.com',
-            'Password': 'securepassword123'
+            'Password': 'securepassword123',
+            'Type': 'Citizen'
         }
         
     def tearDown(self):
@@ -55,16 +55,16 @@ class SignUpTests(TestCase):
             'user with this Email already exists.'
         )
 
-    # def test_missing_required_fields(self):
-    #     test_cases = [
-    #         {'Email': 'test@example.com', 'Password': 'pass'},  # Missing FullName
-    #         {'FullName': 'Test', 'Password': 'pass'},           # Missing Email
-    #         {'FullName': 'Test', 'Email': 'test@example.com'}   # Missing Password
-    #     ]
+    def test_missing_required_fields(self):
+        test_cases = [
+            {'Email': 'test@example.com', 'Password': 'pass'},  # Missing FullName
+            {'FullName': 'Test', 'Password': 'pass'},           # Missing Email
+            {'FullName': 'Test', 'Email': 'test@example.com'}   # Missing Password
+        ]
         
-    #     for data in test_cases:
-    #         response = self.client.post(self.url, data, format='json')
-    #         self.assertEqual(response.status_code, 400)
+        for data in test_cases:
+            response = self.client.post(self.url, data, format='json')
+            self.assertEqual(response.status_code, 400)
 
     # @patch('Authentication.utils.Util.send_email')
     # def test_verification_link_generation(self, mock_send_email):

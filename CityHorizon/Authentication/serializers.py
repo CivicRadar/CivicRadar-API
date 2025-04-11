@@ -10,9 +10,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['FullName', 'Email', 'Password', 'Type', 'Verified']
-        extra_kwargs = {
-            'Password': {'write_only': True}
-        }
 
     def create(self, validated_data):
         Password = validated_data.pop('Password', None)
@@ -27,6 +24,13 @@ class UserSerializer(serializers.ModelSerializer):
         new_data[key] = value
         return new_data
 
+    def validate(self, data):
+        REQUIRED_FIELDS = ['FullName', 'Email', 'Password', 'Type']
+        if any(field not in data.keys() for field in REQUIRED_FIELDS):
+            raise serializers.ValidationError(f"all of these keys should exist in data: {REQUIRED_FIELDS}")
+        if User.objects.filter(Email=data['Email']).exists():
+            raise serializers.ValidationError("user with this Email already exists.")
+        return data
 
 class UserIDSerializer(serializers.ModelSerializer):
     class Meta:
