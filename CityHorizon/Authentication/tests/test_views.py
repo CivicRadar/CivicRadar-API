@@ -1,3 +1,4 @@
+import json
 from django.test import TestCase, tag
 from django.core import signing
 from rest_framework.test import APIClient
@@ -277,12 +278,12 @@ class LogoutViewTests(TestCase):
         self.assertEqual(response.cookies['jwt'].value, '')
         self.assertTrue(response.cookies['jwt']['expires'] == 'Thu, 01 Jan 1970 00:00:00 GMT')
 
-    # # DELETE method tests
-    # def test_delete_without_token(self):
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.delete(self.url)
-        
-    #     self.assertEqual(str(cm.exception.detail), 'Unauthenticated!')
+    # DELETE method tests
+    def test_delete_without_token(self):
+        response = self.client.delete(self.url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], 'Unauthenticated!')
 
     # def test_delete_with_expired_token(self):
     #     self.client.cookies['jwt'] = self.expired_token

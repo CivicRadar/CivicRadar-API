@@ -77,6 +77,7 @@ The Shahrsanj Team
 class Login(APIView):
     def post(self, request):
         try:
+            # needs serializer
             email = request.data['Email']
             password = request.data['Password']
             typeof = request.data['Type']
