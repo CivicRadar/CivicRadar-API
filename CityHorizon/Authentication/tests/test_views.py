@@ -159,14 +159,14 @@ class LoginViewTests(TestCase):
         })
         self.assertEqual(response.status_code, 401)
 
-    # def test_unverified_citizen(self):
-    #     response = self.client.post(self.url, {
-    #         'Email': 'unverified@example.com',
-    #         'Password': 'citizen123',
-    #         'Type': 'Citizen'
-    #     })
-    #     self.assertEqual(response.status_code, 401)
-    #     self.assertIn('Please verify your account via Email', response.content.decode())
+    def test_unverified_citizen(self):
+        response = self.client.post(self.url, {
+            'Email': 'unverified@example.com',
+            'Password': 'citizen123',
+            'Type': 'Citizen'
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('Please verify your account via Email', response.content.decode())
 
     # def test_successful_citizen_login(self):
     #     response = self.client.post(self.url, {
