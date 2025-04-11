@@ -168,35 +168,35 @@ class LoginViewTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertIn('Please verify your account via Email', response.content.decode())
 
-    # def test_successful_citizen_login(self):
-    #     response = self.client.post(self.url, {
-    #         'Email': 'verified@example.com',
-    #         'Password': 'citizen123',
-    #         'Type': 'Citizen'
-    #     })
+    def test_successful_citizen_login(self):
+        response = self.client.post(self.url, {
+            'Email': 'verified@example.com',
+            'Password': 'citizen123',
+            'Type': 'Citizen'
+        })
         
-    #     self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         
-    #     # Verify JWT in response
-    #     self.assertIn('jwt', response.data)
-    #     token = response.data['jwt']
-    #     decoded = self.decode_token(token)
+        # Verify JWT in response
+        self.assertIn('jwt', response.data)
+        token = response.data['jwt']
+        decoded = self.decode_token(token)
         
-    #     # Validate token payload
-    #     self.assertEqual(decoded['id'], self.verified_citizen.id)
-    #     self.assertAlmostEqual(
-    #         decoded['exp'],
-    #         (datetime.datetime.utcnow() + datetime.timedelta(hours=2)).timestamp(),
-    #         delta=5  # Allow 5 seconds difference
-    #     )
+        # Validate token payload
+        self.assertEqual(decoded['id'], self.verified_citizen.id)
+        self.assertAlmostEqual(
+            decoded['exp'],
+            (datetime.datetime.utcnow() + datetime.timedelta(hours=2)).timestamp(),
+            delta=5  # Allow 5 seconds difference
+        )
         
-    #     # Verify cookies
-    #     jwt_cookie = response.cookies.get('jwt')
-    #     self.assertTrue(jwt_cookie)
-    #     self.assertEqual(jwt_cookie.value, token)
-    #     self.assertTrue(jwt_cookie['httponly'])
-    #     self.assertTrue(jwt_cookie['secure'])
-    #     self.assertEqual(jwt_cookie['samesite'], 'None')
+        # Verify cookies
+        jwt_cookie = response.cookies.get('jwt')
+        self.assertTrue(jwt_cookie)
+        self.assertEqual(jwt_cookie.value, token)
+        self.assertTrue(jwt_cookie['httponly'])
+        self.assertTrue(jwt_cookie['secure'])
+        self.assertEqual(jwt_cookie['samesite'], 'None')
 
     # def test_successful_mayor_login(self):
     #     response = self.client.post(self.url, {
