@@ -238,7 +238,7 @@ The Shahrsanj Team
             Util.send_email(data)
             return Response({'success': 'We have sent you a link to reset your password'})
         else:
-            raise AuthenticationFailed('There is no such user')
+            return UnAuthorizedResponse(data={'error': 'There is no such user'})
 
 
 class PasswordTokenCheck(APIView):

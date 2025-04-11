@@ -464,15 +464,15 @@ class RequestPasswordResetTests(TestCase):
             self.assertIn(uid, email_data['email_body'])
             self.assertIn(token, email_data['email_body'])
 
-    # def test_nonexistent_user(self):
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.post(
-    #             self.url,
-    #             {'Email': 'nonexistent@example.com', 'Type': 'Citizen'},
-    #             format='json'
-    #         )
+    def test_nonexistent_user(self):
+        response = self.client.post(
+            self.url,
+            {'Email': 'nonexistent@example.com', 'Type': 'Citizen'},
+            format='json'
+        )
 
-    #     self.assertEqual(str(cm.exception.detail), 'There is no such user')
+        self.assertEqual(response.status_code, 401)
+        self.assertJSONEqual(response.content, {'error': 'There is no such user'})
 
     # def test_invalid_user_type(self):
     #     with self.assertRaises(AuthenticationFailed) as cm:
