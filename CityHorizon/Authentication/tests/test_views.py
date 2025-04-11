@@ -317,10 +317,10 @@ class LogoutViewTests(TestCase):
 class ProfileViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.url = '/api/profile/'
+        self.url = '/auth/profile/'
         
         # Create test user
-        self.user = User.objects.create_user(
+        self.user = create_user(
             Email='test@example.com',
             Password='testpass123',
             FullName='Original Name',
@@ -349,10 +349,11 @@ class ProfileViewTests(TestCase):
         self.client.cookies['jwt'] = token
         
     # GET method tests
-    # def test_get_unauthenticated(self):
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(self.url)
-    #     self.assertEqual(str(cm.exception.detail), 'Unauthenticated!')
+    def test_get_unauthenticated(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], 'Unauthenticated!')
 
     # def test_get_expired_token(self):
     #     self.set_auth_cookie(self.expired_token)

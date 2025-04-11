@@ -148,7 +148,7 @@ class Profile(APIView):
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
-            raise AuthenticationFailed("User not found!")
+            return Response({'error': "User not found!"}, status=status.HTTP_401_UNAUTHORIZED)
 
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
