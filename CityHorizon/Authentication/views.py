@@ -168,9 +168,13 @@ class Profile(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
 
-        user.FullName = request.data['FullName']
-        if 'Picture' in request.data:
-            user.Picture = request.data['Picture']
+        user.FullName = request.data.get('FullName', user.FullName)
+
+        picture = request.FILES.get('Picture')
+        if picture:
+            user.Picture = picture
+        # در غیر این صورت، فایلی نیومده، عکس قبلی بمونه
+
         user.save()
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
