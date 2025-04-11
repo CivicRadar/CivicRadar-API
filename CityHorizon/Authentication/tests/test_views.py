@@ -1,6 +1,7 @@
 import json
 from django.test import TestCase, tag
 from django.core import signing
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from rest_framework.exceptions import AuthenticationFailed
 from Authentication.models import User
@@ -311,3 +312,103 @@ class LogoutViewTests(TestCase):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], 'User not found!')
+
+@tag('profile_view')
+class ProfileViewTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = '/api/profile/'
+        
+        # Create test user
+        self.user = User.objects.create_user(
+            Email='test@example.com',
+            Password='testpass123',
+            FullName='Original Name',
+            Type='Citizen',
+            Verified=True
+        )
+        
+        # Generate valid token
+        self.valid_payload = {
+            'id': self.user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+            'iat': datetime.datetime.utcnow()
+        }
+        self.valid_token = jwt.encode(self.valid_payload, settings.SECRET_KEY, algorithm='HS256')
+        
+        # Generate expired token
+        self.expired_payload = {
+            'id': self.user.id,
+            'exp': datetime.datetime.utcnow() - datetime.timedelta(seconds=1),
+            'iat': datetime.datetime.utcnow()
+        }
+        self.expired_token = jwt.encode(self.expired_payload, settings.SECRET_KEY, algorithm='HS256')
+
+    # Helper methods
+    def set_auth_cookie(self, token):
+        self.client.cookies['jwt'] = token
+        
+    # GET method tests
+    # def test_get_unauthenticated(self):
+    #     with self.assertRaises(AuthenticationFailed) as cm:
+    #         self.client.get(self.url)
+    #     self.assertEqual(str(cm.exception.detail), 'Unauthenticated!')
+
+    # def test_get_expired_token(self):
+    #     self.set_auth_cookie(self.expired_token)
+    #     with self.assertRaises(AuthenticationFailed) as cm:
+    #         self.client.get(self.url)
+    #     self.assertEqual(str(cm.exception.detail), 'Expired token!')
+
+    # def test_get_valid_profile(self):
+    #     self.set_auth_cookie(self.valid_token)
+    #     response = self.client.get(self.url)
+        
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(response.data['Email'], 'test@example.com')
+    #     self.assertEqual(response.data['FullName'], 'Original Name')
+
+    # # POST method tests
+    # def test_post_unauthenticated(self):
+    #     with self.assertRaises(AuthenticationFailed) as cm:
+    #         self.client.post(self.url, {'FullName': 'New Name'})
+    #     self.assertEqual(str(cm.exception.detail), 'Unauthenticated!')
+
+    # def test_post_missing_required_field(self):
+    #     self.set_auth_cookie(self.valid_token)
+    #     response = self.client.post(self.url, {})
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertIn('FullName', response.data)
+
+    # def test_post_successful_update(self):
+    #     self.set_auth_cookie(self.valid_token)
+    #     new_picture = SimpleUploadedFile("test.jpg", b"file_content", content_type="image/jpeg")
+        
+    #     response = self.client.post(self.url, {
+    #         'FullName': 'Updated Name',
+    #         'Picture': new_picture
+    #     }, format='multipart')
+        
+    #     self.assertEqual(response.status_code, 200)
+    #     self.user.refresh_from_db()
+    #     self.assertEqual(self.user.FullName, 'Updated Name')
+    #     self.assertTrue(self.user.Picture.name.endswith('test.jpg'))
+
+    # def test_post_partial_update(self):
+    #     self.set_auth_cookie(self.valid_token)
+    #     response = self.client.post(self.url, {
+    #         'FullName': 'Partial Update'
+    #     })
+        
+    #     self.assertEqual(response.status_code, 200)
+    #     self.user.refresh_from_db()
+    #     self.assertEqual(self.user.FullName, 'Partial Update')
+    #     self.assertEqual(self.user.Picture.name, '')  # Verify picture wasn't changed
+
+    # def test_post_invalid_user(self):
+    #     self.user.delete()
+    #     self.set_auth_cookie(self.valid_token)
+        
+    #     with self.assertRaises(AuthenticationFailed) as cm:
+    #         self.client.post(self.url, {'FullName': 'New Name'})
+    #     self.assertEqual(str(cm.exception.detail), 'User not found!')
