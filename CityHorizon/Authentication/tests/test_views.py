@@ -382,19 +382,19 @@ class ProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content.decode('utf-8'), "all of these keys should exist in data: ['FullName', 'Picture']")
 
-    # def test_post_successful_update(self):
-    #     self.__set_auth_cookie(self.valid_token)
-    #     new_picture = SimpleUploadedFile("test.jpg", b"file_content", content_type="image/jpeg")
-        
-    #     response = self.client.post(self.url, {
-    #         'FullName': 'Updated Name',
-    #         'Picture': new_picture
-    #     }, format='multipart')
-        
-    #     self.assertEqual(response.status_code, 200)
-    #     self.user.refresh_from_db()
-    #     self.assertEqual(self.user.FullName, 'Updated Name')
-    #     self.assertTrue(self.user.Picture.name.endswith('test.jpg'))
+    def test_post_successful_update(self):
+        self.__set_auth_cookie(self.valid_token)
+        new_picture = SimpleUploadedFile("test.jpg", b"file_content", content_type="image/jpeg")
+
+        response = self.client.post(self.url, {
+            'FullName': 'Updated Name',
+            'Picture': new_picture
+        }, format='multipart')
+
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.FullName, 'Updated Name')
+        self.assertTrue(self.user.Picture.name.endswith('test.jpg'))
 
     # def test_post_partial_update(self):
     #     self.__set_auth_cookie(self.valid_token)
