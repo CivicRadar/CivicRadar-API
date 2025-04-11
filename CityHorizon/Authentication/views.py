@@ -169,8 +169,27 @@ class Profile(APIView):
             raise AuthenticationFailed("User not found!")
 
         user.FullName = request.data['FullName']
-        if request.data['Picture']:
+        if 'Picture' in request.data:
             user.Picture = request.data['Picture']
+        user.save()
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)
+
+    def delete(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        user.Picture = None
         user.save()
         serializer = ProfileSerializer(user)
         return Response(serializer.data)

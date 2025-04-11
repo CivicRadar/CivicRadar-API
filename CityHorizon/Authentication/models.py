@@ -21,7 +21,7 @@ class User(AbstractUser):
     LastCooperation = models.DateField(auto_now=False, auto_now_add=False, default=None, null=True, blank=True)
     Verified = models.BooleanField(default=False)
     Picture = models.ImageField(upload_to="Profile_Pictures", null=True, blank=True)
-    Theme = models.CharField(max_length=10, choices=account_theme, null=True)
+    Theme = models.CharField(max_length=10, choices=account_theme, null=True, default='Light')
     username = None
     USERNAME_FIELD = 'Email'
     REQUIRED_FIELDS = []
