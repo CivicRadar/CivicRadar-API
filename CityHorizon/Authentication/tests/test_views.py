@@ -285,13 +285,13 @@ class LogoutViewTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], 'Unauthenticated!')
 
-    # def test_delete_with_expired_token(self):
-    #     self.client.cookies['jwt'] = self.expired_token
-        
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.delete(self.url)
-        
-    #     self.assertEqual(str(cm.exception.detail), 'Expired token!')
+    def test_delete_with_expired_token(self):
+        self.client.cookies['jwt'] = self.expired_token
+
+        response = self.client.delete(self.url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], 'Expired token!')
 
     # def test_successful_account_deletion(self):
     #     self.client.cookies['jwt'] = self.valid_token
