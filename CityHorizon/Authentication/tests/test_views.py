@@ -209,23 +209,23 @@ class LoginViewTests(TestCase):
         decoded = self.decode_token(response.data['jwt'])
         self.assertEqual(decoded['id'], self.mayor.id)
 
-    # def test_theme_cookie(self):
-    #     # Create user with theme preference
-    #     user = create_user(
-    #         Email='themeuser@example.com',
-    #         Password='theme123',
-    #         FullName='Theme User',
-    #         Type='Citizen',
-    #         Verified=True,
-    #         Theme='dark'
-    #     )
-        
-    #     response = self.client.post(self.url, {
-    #         'Email': 'themeuser@example.com',
-    #         'Password': 'theme123',
-    #         'Type': 'Citizen'
-    #     })
-        
-    #     theme_cookie = response.cookies.get('theme')
-    #     self.assertTrue(theme_cookie)
-    #     self.assertEqual(theme_cookie.value, 'dark')
+    def test_theme_cookie(self):
+        # Create user with theme preference
+        create_user(
+            Email='themeuser@example.com',
+            Password='theme123',
+            FullName='Theme User',
+            Type='Citizen',
+            Verified=True,
+            Theme='dark'
+        )
+
+        response = self.client.post(self.url, {
+            'Email': 'themeuser@example.com',
+            'Password': 'theme123',
+            'Type': 'Citizen'
+        })
+
+        theme_cookie = response.cookies.get('theme')
+        self.assertTrue(theme_cookie)
+        self.assertEqual(theme_cookie.value, 'dark')
