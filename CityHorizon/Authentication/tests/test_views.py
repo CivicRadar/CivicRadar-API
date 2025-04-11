@@ -198,16 +198,16 @@ class LoginViewTests(TestCase):
         self.assertTrue(jwt_cookie['secure'])
         self.assertEqual(jwt_cookie['samesite'], 'None')
 
-    # def test_successful_mayor_login(self):
-    #     response = self.client.post(self.url, {
-    #         'Email': 'mayor@city.gov',
-    #         'Password': 'mayor123',
-    #         'Type': 'Mayor'
-    #     })
-        
-    #     self.assertEqual(response.status_code, 200)
-    #     decoded = self.decode_token(response.data['jwt'])
-    #     self.assertEqual(decoded['id'], self.mayor.id)
+    def test_successful_mayor_login(self):
+        response = self.client.post(self.url, {
+            'Email': 'mayor@city.gov',
+            'Password': 'mayor123',
+            'Type': 'Mayor'
+        })
+
+        self.assertEqual(response.status_code, 200)
+        decoded = self.decode_token(response.data['jwt'])
+        self.assertEqual(decoded['id'], self.mayor.id)
 
     # def test_theme_cookie(self):
     #     # Create user with theme preference
