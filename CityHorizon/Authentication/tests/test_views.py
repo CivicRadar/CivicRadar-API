@@ -350,7 +350,7 @@ class ProfileViewTests(TestCase):
 
     def __assert_unauthenticated_response(self, response, detail_value):
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(json.loads(response.content.decode('utf-8'))['detail'], detail_value)
+        self.assertEqual(response.json()['detail'], detail_value)
 
     # GET method tests
     def test_get_unauthenticated(self):
@@ -407,10 +407,10 @@ class ProfileViewTests(TestCase):
         self.assertEqual(self.user.FullName, 'Partial Update')
         self.assertEqual(self.user.Picture.name, '')  # Verify picture wasn't changed
 
-    # def test_post_invalid_user(self):
-    #     self.user.delete()
-    #     self.__set_auth_cookie(self.valid_token)
-        
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.post(self.url, {'FullName': 'New Name'})
-    #     self.assertEqual(str(cm.exception.detail), 'User not found!')
+    def test_post_invalid_user(self):
+        self.user.delete()
+        self.__set_auth_cookie(self.valid_token)
+
+        response = self.client.post(self.url, {'FullName': 'New Name'})
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()['error'], 'User not found!')
