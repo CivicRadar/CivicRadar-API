@@ -90,5 +90,5 @@ class ProfileSerializer(serializers.ModelSerializer):
     @override
     def is_valid(self):
         super().is_valid()
-        REQUIRED_FIELDS = ['FullName', 'Picture']
+        REQUIRED_FIELDS = ['FullName']
         Util.is_contain_required_fields(self.data, REQUIRED_FIELDS)

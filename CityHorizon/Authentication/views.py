@@ -172,8 +172,8 @@ class Profile(APIView):
         try:
             profile_serializer.is_valid()
             user.FullName = profile_serializer.data['FullName']
-            if profile_serializer.data['Picture']:
-                user.Picture = profile_serializer.data['Picture']
+            if 'Picture' in profile_serializer.data.keys() and profile_serializer.data['Picture']:
+                user.Picture = profile_serializer.data['Picture'].name
             user.save()
             serializer = ProfileSerializer(user)
             return Response(serializer.data)

@@ -380,7 +380,7 @@ class ProfileViewTests(TestCase):
         self.__set_auth_cookie(self.valid_token)
         response = self.client.post(self.url, {})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content.decode('utf-8'), "all of these keys should exist in data: ['FullName', 'Picture']")
+        self.assertEqual(response.content.decode('utf-8'), "all of these keys should exist in data: ['FullName']")
 
     def test_post_successful_update(self):
         self.__set_auth_cookie(self.valid_token)
@@ -396,16 +396,16 @@ class ProfileViewTests(TestCase):
         self.assertEqual(self.user.FullName, 'Updated Name')
         self.assertTrue(self.user.Picture.name.endswith('test.jpg'))
 
-    # def test_post_partial_update(self):
-    #     self.__set_auth_cookie(self.valid_token)
-    #     response = self.client.post(self.url, {
-    #         'FullName': 'Partial Update'
-    #     })
+    def test_post_partial_update(self):
+        self.__set_auth_cookie(self.valid_token)
+        response = self.client.post(self.url, {
+            'FullName': 'Partial Update'
+        })
         
-    #     self.assertEqual(response.status_code, 200)
-    #     self.user.refresh_from_db()
-    #     self.assertEqual(self.user.FullName, 'Partial Update')
-    #     self.assertEqual(self.user.Picture.name, '')  # Verify picture wasn't changed
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.FullName, 'Partial Update')
+        self.assertEqual(self.user.Picture.name, '')  # Verify picture wasn't changed
 
     # def test_post_invalid_user(self):
     #     self.user.delete()
