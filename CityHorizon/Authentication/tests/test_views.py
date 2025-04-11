@@ -79,12 +79,12 @@ class SignUpTests(TestCase):
         email_body = mock_send_email.call_args[0][0]['email_body']
         self.assertIn(expected_url, email_body)
 
-    # @patch('Authentication.utils.Util.send_email')
-    # def test_email_template_content(self, mock_send_email):
-    #     self.client.post(self.url, self.valid_data, format='json')
+    @patch('Authentication.utils.Util.send_email')
+    def test_email_template_content(self, mock_send_email):
+        self.client.post(self.url, self.valid_data, format='json')
         
-    #     email_data = mock_send_email.call_args[1]['data']
-    #     self.assertEqual(email_data['email_subject'], 'Verify Your Shahrsanj Account')
-    #     self.assertIn('Dear Test User', email_data['email_body'])
-    #     self.assertIn('The Shahrsanj Team', email_data['email_body'])
+        email_data = mock_send_email.call_args[0][0]
+        self.assertEqual(email_data['email_subject'], 'Verify Your Shahrsanj Account')
+        self.assertIn('Dear Test User', email_data['email_body'])
+        self.assertIn('The Shahrsanj Team', email_data['email_body'])
 
