@@ -371,11 +371,10 @@ class ProfileViewTests(TestCase):
         self.assertEqual(response.data['Email'], 'test@example.com')
         self.assertEqual(response.data['FullName'], 'Original Name')
 
-    # # POST method tests
-    # def test_post_unauthenticated(self):
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.post(self.url, {'FullName': 'New Name'})
-    #     self.assertEqual(str(cm.exception.detail), 'Unauthenticated!')
+    # POST method tests
+    def test_post_unauthenticated(self):
+        response = self.client.post(self.url, {'FullName': 'New Name'})
+        self.__assert_unauthenticated_response(response, 'Unauthenticated!')
 
     # def test_post_missing_required_field(self):
     #     self.__set_auth_cookie(self.valid_token)

@@ -6,12 +6,12 @@ from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnico
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-from .utils import Util
+from .utils import Util, UnAuthorizedResponse
 from django.core.mail import send_mail
 from django.core import signing
 from CityHorizon.settings import EMAIL_HOST_USER
 from decouple import config
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, ProfileSerializer
@@ -105,7 +105,7 @@ class Login(APIView):
 
             response.data = {'jwt': token}
             return response
-        return Response({'error': 'your email or password is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
+        return UnAuthorizedResponse(data={'error': 'your email or password is incorrect'})
 
 class Logout(APIView):
     def get(self, request):
@@ -148,7 +148,7 @@ class Profile(APIView):
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
-            return Response({'error': "User not found!"}, status=status.HTTP_401_UNAUTHORIZED)
+            return UnAuthorizedResponse(data={'error': "User not found!"})
 
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
@@ -166,8 +166,9 @@ class Profile(APIView):
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
-            raise AuthenticationFailed("User not found!")
+            return UnAuthorizedResponse(data="User not found!")
 
+        # TODO: needs serializer
         user.FullName = request.data['FullName']
         if request.data['Picture']:
             user.Picture = request.data['Picture']
