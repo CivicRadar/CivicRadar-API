@@ -40,20 +40,20 @@ class SignUpTests(TestCase):
         # email_body = mock_send_email.call_args[1]['data']['email_body']
         # self.assertIn(token, email_body)
 
-    # def test_duplicate_email_signup(self):
-    #     # Create existing user first
-    #     user = User(FullName='Existing User', Email='test@example.com', Type='Citizen')
-    #     user.set_password('existingpass')
-    #     user.save()
+    def test_duplicate_email_signup(self):
+        # Create existing user first
+        user = User(FullName='Existing User', Email='test@example.com', Type='Citizen')
+        user.set_password('existingpass')
+        user.save()
 
-    #     response = self.client.post(self.url, self.valid_data, format='json')
+        response = self.client.post(self.url, self.valid_data, format='json')
         
-    #     # Check error response
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertEqual(
-    #         response.content.decode('utf-8'),
-    #         'user with this Email already exists.'
-    #     )
+        # Check error response
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.content.decode('utf-8'),
+            'user with this Email already exists.'
+        )
 
     # def test_missing_required_fields(self):
     #     test_cases = [
