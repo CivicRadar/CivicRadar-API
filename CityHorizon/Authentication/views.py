@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 from django.core import signing
 from CityHorizon.settings import EMAIL_HOST_USER
 from decouple import config
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, ProfileSerializer
@@ -27,7 +27,6 @@ class SignUp(APIView):
 
         try:
             user_serializer.is_valid()
-            user_serializer.validate(user_serializer.data)
 
             email = user_serializer.data["Email"]
             # ایجاد توکن تأیید ایمیل
@@ -105,7 +104,7 @@ class Login(APIView):
 
             response.data = {'jwt': token}
             return response
-        raise AuthenticationFailed('your email or password is incorrect')
+        return Response({'error': 'your email or password is incorrect'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class Logout(APIView):
     def get(self, request):

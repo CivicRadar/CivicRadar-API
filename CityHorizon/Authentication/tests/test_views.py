@@ -141,23 +141,23 @@ class LoginViewTests(TestCase):
             self.assertEqual(response.status_code, 400)
             self.assertIn('needs Email, Password and Type fields', response.content.decode())
 
-    # def test_invalid_credentials(self):
-    #     # Non-existent user
-    #     response = self.client.post(self.url, {
-    #         'Email': 'nonexistent@example.com',
-    #         'Password': 'pass',
-    #         'Type': 'Citizen'
-    #     })
-    #     self.assertEqual(response.status_code, 401)
-    #     self.assertIn('email or password is incorrect', response.content.decode())
+    def test_invalid_credentials(self):
+        # Non-existent user
+        response = self.client.post(self.url, {
+            'Email': 'nonexistent@example.com',
+            'Password': 'pass',
+            'Type': 'Citizen'
+        })
+        self.assertEqual(response.status_code, 401)
+        self.assertIn('email or password is incorrect', response.content.decode())
 
-    #     # Wrong password
-    #     response = self.client.post(self.url, {
-    #         'Email': 'verified@example.com',
-    #         'Password': 'wrongpass',
-    #         'Type': 'Citizen'
-    #     })
-    #     self.assertEqual(response.status_code, 401)
+        # Wrong password
+        response = self.client.post(self.url, {
+            'Email': 'verified@example.com',
+            'Password': 'wrongpass',
+            'Type': 'Citizen'
+        })
+        self.assertEqual(response.status_code, 401)
 
     # def test_unverified_citizen(self):
     #     response = self.client.post(self.url, {

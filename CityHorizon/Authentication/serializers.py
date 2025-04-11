@@ -1,4 +1,5 @@
 import copy
+from typing import override
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -24,13 +25,15 @@ class UserSerializer(serializers.ModelSerializer):
         new_data[key] = value
         return new_data
 
-    def validate(self, data):
+    @override
+    def is_valid(self):
+        super().is_valid()
         REQUIRED_FIELDS = ['FullName', 'Email', 'Password', 'Type']
-        if any(field not in data.keys() for field in REQUIRED_FIELDS):
+        if any(field not in self.data.keys() for field in REQUIRED_FIELDS):
             raise serializers.ValidationError(f"all of these keys should exist in data: {REQUIRED_FIELDS}")
-        if User.objects.filter(Email=data['Email']).exists():
+        if User.objects.filter(Email=self.data['Email']).exists():
             raise serializers.ValidationError("user with this Email already exists.")
-        return data
+        return self.data
 
 class UserIDSerializer(serializers.ModelSerializer):
     class Meta:
