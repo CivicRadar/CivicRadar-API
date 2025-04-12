@@ -24,12 +24,12 @@ class SetNewPasswordTests(TestCase):
         self.generator = PasswordResetTokenGenerator()
         
         # Generate valid reset credentials
-        self.valid_uid = urlsafe_base64_encode(smart_bytes(self.user.id))
+        self.valid_ui64 = urlsafe_base64_encode(smart_bytes(self.user.id))
         self.valid_token = self.generator.make_token(self.user)
         
         # Base valid data
         self.valid_data = {
-            'ui64': self.valid_uid,
+            'ui64': self.valid_ui64,
             'token': self.valid_token,
             'Password': 'newSecurePassword123!',
             'ConfirmPassword': 'newSecurePassword123!'
@@ -61,12 +61,12 @@ class SetNewPasswordTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertJSONEqual(response.content, {"detail":"The reset link is invalid"})
 
-    def test_invalid_uid(self):
-        data = {**self.valid_data, 'uid': 'invalid_uid!!'}
+    def test_invalid_ui64(self):
+        data = {**self.valid_data, 'ui64': 'invalid_ui64!!'}
         response = self.client.patch(self.url, data, format='json')
         
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Invalid user ID', str(response.content))
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(response.content, {"detail":"could not decode token"})
 
     # def test_weak_password(self):
     #     data = {**self.valid_data, 
@@ -83,7 +83,7 @@ class SetNewPasswordTests(TestCase):
     #         Email='expired@example.com',
     #         Password='testpass'
     #     )
-    #     expired_uid = urlsafe_base64_encode(smart_bytes(expired_user.id))
+    #     expired_ui64 = urlsafe_base64_encode(smart_bytes(expired_user.id))
     #     expired_token = self.generator.make_token(expired_user)
         
     #     # Invalidate token by changing password
@@ -91,7 +91,7 @@ class SetNewPasswordTests(TestCase):
     #     expired_user.save()
         
     #     data = {
-    #         'uid': expired_uid,
+    #         'ui64': expired_ui64,
     #         'token': expired_token,
     #         'password': 'newPass123!',
     #         'ConfirmPassword': 'newPass123!'

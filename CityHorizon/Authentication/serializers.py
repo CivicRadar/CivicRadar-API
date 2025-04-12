@@ -2,7 +2,7 @@ import copy
 from typing import override
 import django
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import force_str
+from django.utils.encoding import force_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
 from django.http import HttpResponseBadRequest
 from rest_framework import serializers
@@ -72,11 +72,14 @@ class SetNewPasswordSerializer(serializers.Serializer):
         if password != confpas:
             raise AuthenticationFailed('Passwords do not match')
 
-        id=force_str(urlsafe_base64_decode(ui64))
-        user = User.objects.get(id=id)
+        try:
+            id=force_str(urlsafe_base64_decode(ui64))
+            user = User.objects.get(id=id)
 
-        if not PasswordResetTokenGenerator().check_token(user, token):
-            raise AuthenticationFailed('The reset link is invalid')
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                raise AuthenticationFailed('The reset link is invalid')
+        except DjangoUnicodeDecodeError:
+            raise AuthenticationFailed("could not decode token")
 
         user.set_password(password)
         user.save()
