@@ -119,13 +119,14 @@ class ProfileViewTests(TestCase):
         # Depending on your exception handler, DRF converts the exception to a 401.
         self.assertEqual(response.status_code, 403)
 
-    # def test_get_with_invalid_token(self):
-    #     """
-    #     Passing an invalid token should result in a 401 Unauthorized.
-    #     """
-    #     self.client.cookies.load({"jwt": "invalidtoken"})
-    #     response = self.client.get(self.url)
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_get_with_invalid_token(self):
+        """
+        Passing an invalid token should result in a 401 Unauthorized.
+        """
+        self.client.cookies.load({"jwt": "invalidtoken"})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {'detail': 'invalid token!'})
 
     # def test_get_with_expired_token(self):
     #     """
