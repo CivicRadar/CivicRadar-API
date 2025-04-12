@@ -77,26 +77,28 @@ class SetNewPasswordTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {"ConfirmPassword": ["Ensure this field has at least 3 characters."]})
 
-    # def test_expired_token(self):
-    #     # Create another user with expired token
-    #     expired_user = create_user(
-    #         Email='expired@example.com',
-    #         Password='testpass'
-    #     )
-    #     expired_ui64 = urlsafe_base64_encode(smart_bytes(expired_user.id))
-    #     expired_token = self.generator.make_token(expired_user)
-        
-    #     # Invalidate token by changing password
-    #     expired_user.set_password('newpassword')
-    #     expired_user.save()
-        
-    #     data = {
-    #         'ui64': expired_ui64,
-    #         'token': expired_token,
-    #         'password': 'newPass123!',
-    #         'ConfirmPassword': 'newPass123!'
-    #     }
-    #     response = self.client.patch(self.url, data, format='json')
-        
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('Invalid token', str(response.content))
+    def test_expired_token(self):
+        # Create another user with expired token
+        expired_user = create_user(
+            Email='expired@example.com',
+            Password='testpass',
+            FullName='',
+            Type='Cititzen'
+        )
+        expired_ui64 = urlsafe_base64_encode(smart_bytes(expired_user.id))
+        expired_token = self.generator.make_token(expired_user)
+
+        # Invalidate token by changing password
+        expired_user.set_password('newpassword')
+        expired_user.save()
+
+        data = {
+            'ui64': expired_ui64,
+            'token': expired_token,
+            'Password': 'newPass123!',
+            'ConfirmPassword': 'newPass123!'
+        }
+        response = self.client.patch(self.url, data, format='json')
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(response.content, {"detail":"The reset link is invalid"})
