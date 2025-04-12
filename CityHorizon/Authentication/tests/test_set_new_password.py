@@ -68,14 +68,14 @@ class SetNewPasswordTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertJSONEqual(response.content, {"detail":"could not decode token"})
 
-    # def test_weak_password(self):
-    #     data = {**self.valid_data, 
-    #            'password': '1234',
-    #            'ConfirmPassword': '1234'}
-    #     response = self.client.patch(self.url, data, format='json')
-        
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('This password is too short', str(response.content))
+    def test_weak_password(self):
+        data = {**self.valid_data, 
+               'password': '12',
+               'ConfirmPassword': '12'}
+        response = self.client.patch(self.url, data, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {"ConfirmPassword": ["Ensure this field has at least 3 characters."]})
 
     # def test_expired_token(self):
     #     # Create another user with expired token
