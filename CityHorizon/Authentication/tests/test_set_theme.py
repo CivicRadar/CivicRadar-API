@@ -44,24 +44,24 @@ class SetThemeTests(TestCase):
         # Set cookie and send request
         self.client.cookies['jwt'] = self.valid_token
         response = self.client.post(self.url, {'theme': 'dark'}, format='json')
-        
+
         # Check response
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['success'], 'theme changed successfully')
-        
+
         # Check database update
         self.user.refresh_from_db()
         self.assertEqual(self.user.Theme, 'dark')
-        
+
         # Check cookie set
         self.assertEqual(response.cookies['theme'].value, 'dark')
 
-    # def test_missing_theme_field(self):
-    #     self.client.cookies['jwt'] = self.valid_token
-    #     response = self.client.post(self.url, {}, format='json')
-        
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('needs theme field', response.content.decode())
+    def test_missing_theme_field(self):
+        self.client.cookies['jwt'] = self.valid_token
+        response = self.client.post(self.url, {}, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('needs theme field', response.content.decode())
 
     # def test_expired_token(self):
     #     self.client.cookies['jwt'] = self.expired_token
