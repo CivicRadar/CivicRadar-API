@@ -1,20 +1,16 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from rest_framework.exceptions import AuthenticationFailed
 from django.core import signing
 from django.core.signing import b62_encode
 from django.urls import reverse
+from django.core.signing import TimestampSigner
 import time
 
 from Authentication.tests.utilities import create_user
 
 User = get_user_model()
 
-# custom_signer.py
-import time
-from django.core.signing import TimestampSigner
-from datetime import datetime
 
 class CustomTimestampSigner(TimestampSigner):
     def __init__(self, custom_time=None, *args, **kwargs):
