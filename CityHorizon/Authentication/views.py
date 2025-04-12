@@ -194,6 +194,8 @@ class Profile(APIView):
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Expired token!")
+        except:
+            raise ParseError('invalid token!')
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
