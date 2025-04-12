@@ -87,8 +87,9 @@ class EmailVerificationTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertJSONEqual(response.content, {'detail': 'bad signature'})
 
-    # def test_user_not_found(self):
-    #     url = reverse('sign-up-email-verification', args=[self.non_user_token])
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(url)
-    #     self.assertEqual(str(cm.exception.detail), 'user not found')
+    def test_user_not_found(self):
+        url = reverse('sign-up-email-verification', args=[self.non_user_token])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(response.content, {'detail': 'bad signature'})

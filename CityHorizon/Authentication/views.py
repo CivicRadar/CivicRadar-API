@@ -1,3 +1,4 @@
+import binascii
 from django.conf import settings
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render
@@ -278,6 +279,8 @@ class EmailVerification(APIView):
             raise AuthenticationFailed('bad signature')
         except User.DoesNotExist:
             raise AuthenticationFailed('user not found')
+        except binascii.Error:
+            raise AuthenticationFailed('bad signature')
 
 class SetTheme(APIView):
     def post(self, request):
