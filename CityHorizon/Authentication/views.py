@@ -175,11 +175,31 @@ class Profile(APIView):
             user.FullName = profile_serializer.data['FullName']
             if 'Picture' in profile_serializer.data.keys() and profile_serializer.data['Picture']:
                 user.Picture = profile_serializer.data['Picture'].name
+            # در غیر این صورت، فایلی نیومده، عکس قبلی بمونه
             user.save()
             serializer = ProfileSerializer(user)
             return Response(serializer.data)
         except serializers.ValidationError as e:
             return HttpResponseBadRequest(e.detail)
+
+    def delete(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        user.Picture = None
+        user.save()
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)
 
 class RequestPasswordReset(APIView):
     def post(self, request):
