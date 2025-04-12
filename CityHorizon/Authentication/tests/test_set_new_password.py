@@ -54,12 +54,12 @@ class SetNewPasswordTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertIn('Passwords do not match', str(response.content))
 
-    # def test_invalid_token(self):
-    #     data = {**self.valid_data, 'token': 'invalid-token-123'}
-    #     response = self.client.patch(self.url, data, format='json')
+    def test_invalid_token(self):
+        data = {**self.valid_data, 'token': 'invalid-token-123'}
+        response = self.client.patch(self.url, data, format='json')
         
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('Invalid token', str(response.content))
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(response.content, {"detail":"The reset link is invalid"})
 
     # def test_invalid_uid(self):
     #     data = {**self.valid_data, 'uid': 'invalid_uid!!'}
