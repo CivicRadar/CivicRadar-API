@@ -61,12 +61,12 @@ class SetNewPasswordTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertJSONEqual(response.content, {"detail":"The reset link is invalid"})
 
-    # def test_invalid_uid(self):
-    #     data = {**self.valid_data, 'uid': 'invalid_uid!!'}
-    #     response = self.client.patch(self.url, data, format='json')
+    def test_invalid_uid(self):
+        data = {**self.valid_data, 'uid': 'invalid_uid!!'}
+        response = self.client.patch(self.url, data, format='json')
         
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('Invalid user ID', str(response.content))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Invalid user ID', str(response.content))
 
     # def test_weak_password(self):
     #     data = {**self.valid_data, 
