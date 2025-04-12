@@ -256,7 +256,7 @@ class PasswordTokenCheck(APIView):
                 raise AuthenticationFailed('Invalid token')
             return Response({'message':'Credentials valid', 'ui64':ui64, 'token':token})
         except DjangoUnicodeDecodeError:
-            raise HttpResponseBadRequest('Invalid token')
+            return HttpResponseBadRequest('Invalid token')
 
 class SetNewPassword(APIView):
     serializer_class = SetNewPasswordSerializer

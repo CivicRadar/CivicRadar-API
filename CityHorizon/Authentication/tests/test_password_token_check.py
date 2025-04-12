@@ -56,15 +56,15 @@ class PasswordTokenCheckTests(TestCase):
 
         self.__assert_unauthenticated_response(response, 'Invalid token')
 
-    # # Test invalid uidb64 encoding
-    # def test_invalid_uidb64(self):
-    #     invalid_uidb64 = 'invalid_uid!!'  # Invalid base64 characters
-    #     url = self.get_url(invalid_uidb64, self.valid_token)
-        
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(url)
-            
-    #     self.assertEqual(str(cm.exception.detail), 'Invalid token')
+    # Test invalid uidb64 encoding
+    def test_invalid_uidb64(self):
+        invalid_uidb64 = 'invalid_uid!!'  # Invalid base64 characters
+        url = self.get_url(invalid_uidb64, self.valid_token)
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content.decode('utf-8'), 'Invalid token')
 
     # # Test expired token (requires time manipulation)
     # def test_expired_token(self):
