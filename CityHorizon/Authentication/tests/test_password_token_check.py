@@ -4,9 +4,8 @@ import jwt
 from django.test import TestCase, tag
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from rest_framework.exceptions import AuthenticationFailed
 from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import smart_bytes, smart_str
+from django.utils.encoding import smart_bytes
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.urls import reverse
 
