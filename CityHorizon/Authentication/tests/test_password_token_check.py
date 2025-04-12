@@ -33,6 +33,10 @@ class PasswordTokenCheckTests(TestCase):
     def get_url(self, uidb64, token):
         return reverse('password-reset-confirmed', args=[uidb64, token])
 
+    def __assert_unauthenticated_response(self, response, detail_value):
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['detail'], detail_value)
+
     # Test valid credentials
     def test_valid_token_and_uid(self):
         url = self.get_url(self.uidb64, self.valid_token)
@@ -43,15 +47,14 @@ class PasswordTokenCheckTests(TestCase):
         self.assertEqual(response.data['ui64'], self.uidb64)
         self.assertEqual(response.data['token'], self.valid_token)
 
-    # # Test invalid token
-    # def test_invalid_token(self):
-    #     invalid_token = self.valid_token[:-1] + 'x'  # Corrupt last character
-    #     url = self.get_url(self.uidb64, invalid_token)
-        
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(url)
-            
-    #     self.assertEqual(str(cm.exception.detail), 'Invalid token')
+    # Test invalid token
+    def test_invalid_token(self):
+        invalid_token = self.valid_token[:-1] + 'x'  # Corrupt last character
+        url = self.get_url(self.uidb64, invalid_token)
+
+        response = self.client.get(url)
+
+        self.__assert_unauthenticated_response(response, 'Invalid token')
 
     # # Test invalid uidb64 encoding
     # def test_invalid_uidb64(self):
