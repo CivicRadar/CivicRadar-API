@@ -72,20 +72,21 @@ class SetThemeTests(TestCase):
 
         self.assertJSONEqual(response.content, {'detail': 'Expired token!'})
 
-    # def test_invalid_user(self):
-    #     # Create valid token for non-existent user
-    #     payload = {
-    #         'id': 9999,  # Non-existent ID
-    #         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1),
-    #         'iat': datetime.datetime.utcnow()
-    #     }
-    #     invalid_token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-        
-    #     self.client.cookies['jwt'] = invalid_token
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.post(self.url, {'theme': 'dark'}, format='json')
-        
-    #     self.assertEqual(str(cm.exception.detail), 'User not found!')
+    def test_invalid_user(self):
+        # Create valid token for non-existent user
+        payload = {
+            'id': 9999,  # Non-existent ID
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+            'iat': datetime.datetime.utcnow()
+        }
+        invalid_token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+        self.client.cookies['jwt'] = invalid_token
+
+        response = self.client.post(self.url, {'theme': 'dark'}, format='json')
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(response.content, {'detail': 'User not found!'})
 
     # def test_unauthenticated_request(self):
     #     # No JWT cookie set
