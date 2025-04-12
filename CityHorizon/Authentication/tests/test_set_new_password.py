@@ -46,13 +46,13 @@ class SetNewPasswordTests(TestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password('newSecurePassword123!'))
 
-    # # Failure cases
-    # def test_password_mismatch(self):
-    #     data = {**self.valid_data, 'password2': 'differentPassword456!'}
-    #     response = self.client.patch(self.url, data, format='json')
-        
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('Passwords do not match', str(response.content))
+    # Failure cases
+    def test_password_mismatch(self):
+        data = {**self.valid_data, 'ConfirmPassword': 'differentPassword456!'}
+        response = self.client.patch(self.url, data, format='json')
+
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('Passwords do not match', str(response.content))
 
     # def test_invalid_token(self):
     #     data = {**self.valid_data, 'token': 'invalid-token-123'}
@@ -71,7 +71,7 @@ class SetNewPasswordTests(TestCase):
     # def test_weak_password(self):
     #     data = {**self.valid_data, 
     #            'password': '1234',
-    #            'password2': '1234'}
+    #            'ConfirmPassword': '1234'}
     #     response = self.client.patch(self.url, data, format='json')
         
     #     self.assertEqual(response.status_code, 400)
@@ -94,7 +94,7 @@ class SetNewPasswordTests(TestCase):
     #         'uid': expired_uid,
     #         'token': expired_token,
     #         'password': 'newPass123!',
-    #         'password2': 'newPass123!'
+    #         'ConfirmPassword': 'newPass123!'
     #     }
     #     response = self.client.patch(self.url, data, format='json')
         

@@ -1,10 +1,12 @@
 import copy
 from typing import override
+import django
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.http import HttpResponseBadRequest
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, NotFound
 
 from .models import User
 from .utils import Util
