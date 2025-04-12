@@ -88,7 +88,8 @@ class SetThemeTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertJSONEqual(response.content, {'detail': 'User not found!'})
 
-    # def test_unauthenticated_request(self):
-    #     # No JWT cookie set
-    #     response = self.client.post(self.url, {'theme': 'dark'}, format='json')
-    #     self.assertEqual(response.status_code, 401)
+    def test_unauthenticated_request(self):
+        # No JWT cookie set
+        response = self.client.post(self.url, {'theme': 'dark'}, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {'detail': 'invalid data'})

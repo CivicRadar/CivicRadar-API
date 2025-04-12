@@ -302,3 +302,5 @@ class SetTheme(APIView):
             raise AuthenticationFailed("Expired token!")
         except KeyError:
             return HttpResponseBadRequest("needs theme field in request data")
+        except jwt.exceptions.DecodeError:
+            raise ParseError('invalid data')
