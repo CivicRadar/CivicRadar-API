@@ -13,7 +13,7 @@ from django.core import signing
 from CityHorizon.settings import EMAIL_HOST_USER
 from decouple import config
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ParseError
 from rest_framework.views import APIView
 from .serializers import UserSerializer, RequestPasswordResetSerializer, SetNewPasswordSerializer, ProfileSerializer
 from rest_framework.response import Response
@@ -286,6 +286,8 @@ class SetTheme(APIView):
     def post(self, request):
         try:
             token = request.COOKIES.get('jwt')
+            if 'theme' not in request.data or not request.data['theme']:
+                raise ParseError('invalid theme value')
             new_theme = request.data['theme']
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
             user = User.objects.filter(id=payload['id']).first()

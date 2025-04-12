@@ -61,14 +61,16 @@ class SetThemeTests(TestCase):
         response = self.client.post(self.url, {}, format='json')
 
         self.assertEqual(response.status_code, 400)
-        self.assertIn('needs theme field', response.content.decode())
+        self.assertJSONEqual(response.content, {"detail":"invalid theme value"})
 
-    # def test_expired_token(self):
-    #     self.client.cookies['jwt'] = self.expired_token
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.post(self.url, {'theme': 'dark'}, format='json')
-        
-    #     self.assertEqual(str(cm.exception.detail), 'Expired token!')
+    def test_expired_token(self):
+        self.client.cookies['jwt'] = self.expired_token
+
+        response = self.client.post(self.url, {'theme': 'dark'}, format='json')
+
+        self.assertEqual(response.status_code, 403)
+
+        self.assertJSONEqual(response.content, {'detail': 'Expired token!'})
 
     # def test_invalid_user(self):
     #     # Create valid token for non-existent user
