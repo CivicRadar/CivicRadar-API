@@ -66,17 +66,17 @@ class PasswordTokenCheckTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content.decode('utf-8'), 'Invalid token')
 
-    # # Test expired token (requires time manipulation)
-    # def test_expired_token(self):
-    #     # Create token with past timestamp
-    #     expired_payload = {
-    #         'id': self.user.id,
-    #         'exp': datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    #     }
-    #     expired_token = jwt.encode(expired_payload, settings.SECRET_KEY, algorithm='HS256')
-        
-    #     url = self.get_url(self.uidb64, expired_token)
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(url)
-            
-    #     self.assertEqual(str(cm.exception.detail), 'Invalid token')
+    # Test expired token (requires time manipulation)
+    def test_expired_token(self):
+        # Create token with past timestamp
+        expired_payload = {
+            'id': self.user.id,
+            'exp': datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        }
+        expired_token = jwt.encode(expired_payload, settings.SECRET_KEY, algorithm='HS256')
+
+        url = self.get_url(self.uidb64, expired_token)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+        self.assertJSONEqual(response.content, {"detail":"Invalid token"})
