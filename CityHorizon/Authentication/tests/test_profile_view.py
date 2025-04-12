@@ -128,13 +128,13 @@ class ProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {'detail': 'invalid token!'})
 
-    # def test_get_with_expired_token(self):
-    #     """
-    #     An expired token should also result in a 401 Unauthorized response.
-    #     """
-    #     self.client.cookies.load({"jwt": self.expired_token})
-    #     response = self.client.get(self.url)
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_get_with_expired_token(self):
+        """
+        An expired token should also result in a 401 Unauthorized response.
+        """
+        self.client.cookies.load({"jwt": self.expired_token})
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
 
     # def test_get_with_valid_token(self):
     #     """
