@@ -73,11 +73,12 @@ class EmailVerificationTests(TestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.Verified)
 
-    # def test_expired_token(self):
-    #     url = reverse('sign-up-email-verification', args=[self.expired_token])
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(url)
-    #     self.assertEqual(str(cm.exception.detail), 'bad signature')
+    def test_expired_token(self):
+        url = reverse('sign-up-email-verification', args=[self.expired_token])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(response.content, {'detail': 'bad signature'}g)
 
     # def test_invalid_token(self):
     #     url = reverse('sign-up-email-verification', args=[self.invalid_token])
