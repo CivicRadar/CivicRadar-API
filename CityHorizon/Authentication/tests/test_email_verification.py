@@ -78,13 +78,14 @@ class EmailVerificationTests(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 403)
-        self.assertJSONEqual(response.content, {'detail': 'bad signature'}g)
+        self.assertJSONEqual(response.content, {'detail': 'bad signature'})
 
-    # def test_invalid_token(self):
-    #     url = reverse('sign-up-email-verification', args=[self.invalid_token])
-    #     with self.assertRaises(AuthenticationFailed) as cm:
-    #         self.client.get(url)
-    #     self.assertEqual(str(cm.exception.detail), 'bad signature')
+    def test_invalid_token(self):
+        url = reverse('sign-up-email-verification', args=[self.invalid_token])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(response.content, {'detail': 'bad signature'})
 
     # def test_user_not_found(self):
     #     url = reverse('sign-up-email-verification', args=[self.non_user_token])
