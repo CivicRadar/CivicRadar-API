@@ -484,14 +484,14 @@ class RequestPasswordResetTests(TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertJSONEqual(response.content, {'error': 'There is no such user'})
 
-    # def test_missing_fields(self):
-    #     test_cases = [
-    #         {'Type': 'Citizen'},  # Missing Email
-    #         {'Email': 'user@example.com'},  # Missing Type
-    #         {}  # Both missing
-    #     ]
+    def test_missing_fields(self):
+        test_cases = [
+            {'Type': 'Citizen'},  # Missing Email
+            {'Email': 'user@example.com'},  # Missing Type
+            {}  # Both missing
+        ]
 
-    #     for data in test_cases:
-    #         response = self.client.post(self.url, data, format='json')
-    #         self.assertEqual(response.status_code, 400)
-    #         self.assertIn('This field is required', json.loads(response.content))
+        for data in test_cases:
+            response = self.client.post(self.url, data, format='json')
+            self.assertEqual(response.status_code, 400)
+            self.assertIn(response.content.decode('utf-8'), "all of these keys should exist in data: ['Email', 'Type']")

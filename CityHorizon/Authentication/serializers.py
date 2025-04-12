@@ -40,9 +40,18 @@ class UserIDSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'FullName', 'Email', 'Type']
 
-class ResetPasswordRequestSerializer(serializers.Serializer):
-    def validate(self, attrs):
-        return super().validate(attrs)
+class RequestPasswordResetSerializer(serializers.Serializer):
+    Email = serializers.CharField()
+    Type = serializers.CharField()
+    class Meta:
+        model = User
+        fields = ['Email', 'Type']
+
+    @override
+    def is_valid(self):
+        super().is_valid()
+        REQUIRED_FIELDS = ['Email', 'Type']
+        Util.is_contain_required_fields(self.data, REQUIRED_FIELDS)
 
 class SetNewPasswordSerializer(serializers.Serializer):
     Password = serializers.CharField(min_length=3, write_only=True)

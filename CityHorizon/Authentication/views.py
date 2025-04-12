@@ -14,7 +14,7 @@ from decouple import config
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
-from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, ProfileSerializer
+from .serializers import UserSerializer, RequestPasswordResetSerializer, SetNewPasswordSerializer, ProfileSerializer
 from rest_framework.response import Response
 from .models import User
 from django.core import signing
@@ -182,25 +182,28 @@ class Profile(APIView):
 
 class RequestPasswordReset(APIView):
     def post(self, request):
-        email = request.data['Email']
-        Typeof = request.data['Type']
-        if User.objects.filter(Email=email, Type=Typeof).exists():
-            user = User.objects.get(Email=email)
-            ui64 = urlsafe_base64_encode(smart_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
+        try:
+            serializer = RequestPasswordResetSerializer(data=request.data)
+            serializer.is_valid()
+            email = serializer.data['Email']
+            Typeof = serializer.data['Type']
+            if User.objects.filter(Email=email, Type=Typeof).exists():
+                user = User.objects.get(Email=email)
+                ui64 = urlsafe_base64_encode(smart_bytes(user.id))
+                token = PasswordResetTokenGenerator().make_token(user)
 
-            # Generate the frontend URL with uidb64 and token
-            absurl = f'{config("BASE_HTTP")}://{config("BASE_URL")}/auth/password-reset/{ui64}/{token}/'
-            #
-            from django.template import Template, Context
-            user_name = user.FullName  # Replace with actual user name retrieval logic
-            reset_link = absurl  # Replace with actual token generation logic
+                # Generate the frontend URL with uidb64 and token
+                absurl = f'{config("BASE_HTTP")}://{config("BASE_URL")}/auth/password-reset/{ui64}/{token}/'
 
-            # Email subject
-            subject = 'Reset Your Shahrsanj Password'
+                from django.template import Template, Context
+                user_name = user.FullName  # Replace with actual user name retrieval logic
+                reset_link = absurl  # Replace with actual token generation logic
 
-            # Email body template as a string
-            email_body_template = Template("""
+                # Email subject
+                subject = 'Reset Your Shahrsanj Password'
+
+                # Email body template as a string
+                email_body_template = Template("""
 Dear {{ user_name }},
 
 We received a request to reset your password for your Shahrsanj account. If you did not make this request, please ignore this email.
@@ -218,27 +221,29 @@ Thank you for using Shahrsanj!
 Best regards,
 
 The Shahrsanj Team
-             """)
+                """)
 
-            # Context data
-            context = Context({
-                'user_name': user_name,
-                'reset_link': reset_link,
-            })
+                # Context data
+                context = Context({
+                    'user_name': user_name,
+                    'reset_link': reset_link,
+                })
 
-            # Render the email body with the context
-            email_body = email_body_template.render(context)
+                # Render the email body with the context
+                email_body = email_body_template.render(context)
 
-            #
-            data = {
-                'email_body': email_body,
-                'to_email': email,
-                'email_subject': 'Reset your password'
-            }
-            Util.send_email(data)
-            return Response({'success': 'We have sent you a link to reset your password'})
-        else:
-            return UnAuthorizedResponse(data={'error': 'There is no such user'})
+                #
+                data = {
+                    'email_body': email_body,
+                    'to_email': email,
+                    'email_subject': 'Reset your password'
+                }
+                Util.send_email(data)
+                return Response({'success': 'We have sent you a link to reset your password'})
+            else:
+                return UnAuthorizedResponse(data={'error': 'There is no such user'})
+        except serializers.ValidationError as e:
+            return HttpResponseBadRequest(e.detail)
 
 
 class PasswordTokenCheck(APIView):
