@@ -1,3 +1,4 @@
+import binascii
 from django.conf import settings
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render
@@ -6,15 +7,15 @@ from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnico
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-from .utils import Util
+from .utils import Util, UnAuthorizedResponse
 from django.core.mail import send_mail
 from django.core import signing
 from CityHorizon.settings import EMAIL_HOST_USER
 from decouple import config
-from rest_framework import generics
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed, ParseError
 from rest_framework.views import APIView
-from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, ProfileSerializer
+from .serializers import UserSerializer, RequestPasswordResetSerializer, SetNewPasswordSerializer, ProfileSerializer
 from rest_framework.response import Response
 from .models import User
 from django.core import signing
@@ -23,11 +24,12 @@ import jwt, datetime
 
 class SignUp(APIView):
     def post(self, request):
-        request.data['Type'] = 'Citizen'
-        email = request.data['Email']
-        Typeof = 'Citizen'
+        user_serializer = UserSerializer(data=request.data)
 
-        if User.objects.filter(Email=email).first() is None:
+        try:
+            user_serializer.is_valid()
+
+            email = user_serializer.data["Email"]
             # ایجاد توکن تأیید ایمیل
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
 
@@ -35,9 +37,7 @@ class SignUp(APIView):
             frontend_url = f'{config("BASE_HTTP")}://{config("BASE_URL")}/verifyemail?token={token}'
 
             # ایجاد کاربر
-            user = User(FullName=request.data['FullName'], Email=email, Type=Typeof)
-            user.set_password(request.data['Password'])
-            user.save()
+            user = user_serializer.create(user_serializer.data)
 
             # قالب ایمیل
             from django.template import Template, Context
@@ -71,13 +71,14 @@ The Shahrsanj Team
             Util.send_email(data)
 
             return Response({'success': 'We have sent you a link to verify your email address'})
-        else:
-            raise AuthenticationFailed('user with this Email already exists.')
+        except serializers.ValidationError as e:
+            return HttpResponseBadRequest(e.detail)
 
 
 class Login(APIView):
     def post(self, request):
         try:
+            # needs serializer
             email = request.data['Email']
             password = request.data['Password']
             typeof = request.data['Type']
@@ -105,7 +106,7 @@ class Login(APIView):
 
             response.data = {'jwt': token}
             return response
-        raise AuthenticationFailed('your email or password is incorrect')
+        return UnAuthorizedResponse(data={'error': 'your email or password is incorrect'})
 
 class Logout(APIView):
     def get(self, request):
@@ -145,10 +146,12 @@ class Profile(APIView):
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Expired token!")
+        except:
+            raise ParseError('invalid token!')
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
-            raise AuthenticationFailed("User not found!")
+            return UnAuthorizedResponse(data={'error': "User not found!"})
 
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
@@ -166,18 +169,21 @@ class Profile(APIView):
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
-            raise AuthenticationFailed("User not found!")
+            return UnAuthorizedResponse(data={'error': 'User not found!'})
 
-        user.FullName = request.data.get('FullName', user.FullName)
-
-        picture = request.FILES.get('Picture')
-        if picture:
-            user.Picture = picture
-        # در غیر این صورت، فایلی نیومده، عکس قبلی بمونه
-
-        user.save()
-        serializer = ProfileSerializer(user)
-        return Response(serializer.data)
+        profile_serializer = ProfileSerializer(data=request.data)
+        try:
+            profile_serializer.is_valid()
+            user.FullName = profile_serializer.data['FullName']
+            picture = request.FILES.get('Picture')
+            if picture:
+                user.Picture = picture
+            # در غیر این صورت، فایلی نیومده، عکس قبلی بمونه
+            user.save()
+            serializer = ProfileSerializer(user)
+            return Response(serializer.data)
+        except serializers.ValidationError as e:
+            return HttpResponseBadRequest(e.detail)
 
     def delete(self, request):
         token = request.COOKIES.get('jwt')
@@ -189,6 +195,8 @@ class Profile(APIView):
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Expired token!")
+        except:
+            raise ParseError('invalid token!')
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
@@ -200,25 +208,28 @@ class Profile(APIView):
 
 class RequestPasswordReset(APIView):
     def post(self, request):
-        email = request.data['Email']
-        Typeof = request.data['Type']
-        if User.objects.filter(Email=email, Type=Typeof).exists():
-            user = User.objects.get(Email=email)
-            ui64 = urlsafe_base64_encode(smart_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
+        try:
+            serializer = RequestPasswordResetSerializer(data=request.data)
+            serializer.is_valid()
+            email = serializer.data['Email']
+            Typeof = serializer.data['Type']
+            if User.objects.filter(Email=email, Type=Typeof).exists():
+                user = User.objects.get(Email=email)
+                ui64 = urlsafe_base64_encode(smart_bytes(user.id))
+                token = PasswordResetTokenGenerator().make_token(user)
 
-            # Generate the frontend URL with uidb64 and token
-            absurl = f'{config("BASE_HTTP")}://{config("BASE_URL")}/auth/password-reset/{ui64}/{token}/'
-            #
-            from django.template import Template, Context
-            user_name = user.FullName  # Replace with actual user name retrieval logic
-            reset_link = absurl  # Replace with actual token generation logic
+                # Generate the frontend URL with uidb64 and token
+                absurl = f'{config("BASE_HTTP")}://{config("BASE_URL")}/auth/password-reset/{ui64}/{token}/'
 
-            # Email subject
-            subject = 'Reset Your Shahrsanj Password'
+                from django.template import Template, Context
+                user_name = user.FullName  # Replace with actual user name retrieval logic
+                reset_link = absurl  # Replace with actual token generation logic
 
-            # Email body template as a string
-            email_body_template = Template("""
+                # Email subject
+                subject = 'Reset Your Shahrsanj Password'
+
+                # Email body template as a string
+                email_body_template = Template("""
 Dear {{ user_name }},
 
 We received a request to reset your password for your Shahrsanj account. If you did not make this request, please ignore this email.
@@ -236,27 +247,29 @@ Thank you for using Shahrsanj!
 Best regards,
 
 The Shahrsanj Team
-             """)
+                """)
 
-            # Context data
-            context = Context({
-                'user_name': user_name,
-                'reset_link': reset_link,
-            })
+                # Context data
+                context = Context({
+                    'user_name': user_name,
+                    'reset_link': reset_link,
+                })
 
-            # Render the email body with the context
-            email_body = email_body_template.render(context)
+                # Render the email body with the context
+                email_body = email_body_template.render(context)
 
-            #
-            data = {
-                'email_body': email_body,
-                'to_email': email,
-                'email_subject': 'Reset your password'
-            }
-            Util.send_email(data)
-            return Response({'success': 'We have sent you a link to reset your password'})
-        else:
-            raise AuthenticationFailed('There is no such user')
+                #
+                data = {
+                    'email_body': email_body,
+                    'to_email': email,
+                    'email_subject': 'Reset your password'
+                }
+                Util.send_email(data)
+                return Response({'success': 'We have sent you a link to reset your password'})
+            else:
+                return UnAuthorizedResponse(data={'error': 'There is no such user'})
+        except serializers.ValidationError as e:
+            return HttpResponseBadRequest(e.detail)
 
 
 class PasswordTokenCheck(APIView):
@@ -269,7 +282,7 @@ class PasswordTokenCheck(APIView):
                 raise AuthenticationFailed('Invalid token')
             return Response({'message':'Credentials valid', 'ui64':ui64, 'token':token})
         except DjangoUnicodeDecodeError:
-            raise AuthenticationFailed('Invalid token')
+            return HttpResponseBadRequest('Invalid token')
 
 class SetNewPassword(APIView):
     serializer_class = SetNewPasswordSerializer
@@ -291,11 +304,15 @@ class EmailVerification(APIView):
             raise AuthenticationFailed('bad signature')
         except User.DoesNotExist:
             raise AuthenticationFailed('user not found')
+        except binascii.Error:
+            raise AuthenticationFailed('bad signature')
 
 class SetTheme(APIView):
     def post(self, request):
         try:
             token = request.COOKIES.get('jwt')
+            if 'theme' not in request.data or not request.data['theme']:
+                raise ParseError('invalid theme value')
             new_theme = request.data['theme']
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
             user = User.objects.filter(id=payload['id']).first()
@@ -310,3 +327,5 @@ class SetTheme(APIView):
             raise AuthenticationFailed("Expired token!")
         except KeyError:
             return HttpResponseBadRequest("needs theme field in request data")
+        except jwt.exceptions.DecodeError:
+            raise ParseError('invalid data')
