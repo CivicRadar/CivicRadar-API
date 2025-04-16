@@ -81,3 +81,11 @@ class MayorNote(models.Model):
     NoteOwner = models.ForeignKey(User, on_delete=models.CASCADE)
     Information = models.CharField(max_length=1000)
     CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
+
+class Notification(models.Model):
+    Message = models.CharField(max_length=1000)
+    Receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Receiver')
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, related_name='CityProblem')
+    Date = models.DateTimeField(auto_now_add=True)
+    Seen = models.BooleanField(default=False)
+    Sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Sender')

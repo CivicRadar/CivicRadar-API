@@ -24,4 +24,5 @@ urlpatterns = [
     path('auth/', include('Authentication.urls')),
     path('mayor-registry/', include('MayorRegistry.urls')),
     path('supervise/', include('IssueSupervision.urls')),
+    path('communicate/', include('Communication.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -4,7 +4,7 @@ from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from Authentication.models import CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote
+from Authentication.models import CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote, Notification
 from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer
 import jwt, datetime
 
@@ -255,11 +255,23 @@ class MayorDetermineCityProblemSituation(APIView):
         if cityproblem is None:
             raise AuthenticationFailed("city problem not found or does not belong to you!")
         newsituation = request.data['NewSituation']
+        mydict = {
+            'PendingReview': ' در انتظار برای بررسی می باشد',
+            'UnderConsideration': ' در حال بررسی است',
+            'IssueResolved': ' حل شد'
+        }
+        if newsituation not in mydict:
+            raise AuthenticationFailed("your newsituation is not defined")
         if newsituation == cityproblem.Status:
             pass
         elif (cityproblem.Status == 'UnderConsideration' and newsituation=='PendingReview') or cityproblem.Status == 'IssueResolved':
             raise AuthenticationFailed("reverting Problem situations is prohibited!")
         else:
+            notif = Notification(Message=f'مشکل گزارش شده از طرف شما توسط شهردار مربوطه{mydict[newsituation]}',
+                                 Receiver=cityproblem.Reporter,
+                                 Sender=user,
+                                 CityProblem=cityproblem)
+            notif.save()
             cityproblem.Status=newsituation
             cityproblem.save()
         serializer = CityProblemSerializer(cityproblem)
