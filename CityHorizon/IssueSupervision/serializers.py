@@ -20,6 +20,7 @@ class CityProblemSerializer(serializers.Serializer):
     Longitude = serializers.FloatField()
     Latitude = serializers.FloatField()
     FullAdress = serializers.CharField()
+    Status = serializers.CharField()
 
 class ReportCitizenSerializer(serializers.Serializer):
     id = serializers.IntegerField()
