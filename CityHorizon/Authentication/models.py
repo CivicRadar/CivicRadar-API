@@ -48,6 +48,11 @@ class CityProblem(models.Model):
         ('Street', 'Street'),
         ('Other', 'Other'),
     ]
+    status_type = [
+        ('PendingReview', 'PendingReview'),
+        ('UnderConsideration','UnderConsideration'),
+        ('IssueResolved','IssueResolved')
+    ]
 
     City = models.ForeignKey(Cities, on_delete=models.CASCADE)
     Information = models.CharField(max_length=200)
@@ -59,6 +64,7 @@ class CityProblem(models.Model):
     Longitude = models.FloatField()
     Latitude = models.FloatField()
     FullAdress = models.CharField(max_length=300)
+    Status = models.CharField(default='PendingReview', choices=status_type, max_length=20)
 
 class ReportCitizen(models.Model):
     Reporter = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -68,16 +74,8 @@ class ReportCitizen(models.Model):
         unique_together = ('Reporter', 'Reported')
 
 class CityProblemProsecute(models.Model):
-    status_type = [
-        ('PendingReview', 'PendingReview'),
-        ('UnderConsideration','UnderConsideration'),
-        ('IssueResolved','IssueResolved')
-    ]
-
     CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
     Prosecuter = models.ForeignKey(User, on_delete=models.CASCADE)
-    Status = models.CharField(choices=status_type, max_length=20)
-    DateTime = models.DateTimeField(auto_now=True)
 
 class MayorNote(models.Model):
     NoteOwner = models.ForeignKey(User, on_delete=models.CASCADE)

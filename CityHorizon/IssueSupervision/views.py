@@ -234,3 +234,67 @@ class MayorNotes(APIView):
         note.delete()
 
         return Response({'success': 'note deleted successfully'})
+
+class MayorDetermineCityProblemSituation(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+        cityproblem = CityProblem.objects.filter(City__id__in=cities, id=request.data['CityProblemID']).first()
+        if cityproblem is None:
+            raise AuthenticationFailed("city problem not found or does not belong to you!")
+        newsituation = request.data['NewSituation']
+        if newsituation == cityproblem.Status:
+            pass
+        elif (cityproblem.Status == 'UnderConsideration' and newsituation=='PendingReview') or cityproblem.Status == 'IssueResolved':
+            raise AuthenticationFailed("reverting Problem situations is prohibited!")
+        else:
+            cityproblem.Status=newsituation
+            cityproblem.save()
+        serializer = CityProblemSerializer(cityproblem)
+        return Response(serializer.data)
+
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+        CityProblemID = request.query_params.get('CityProblemID')
+        cityproblem = CityProblem.objects.filter(City__id__in=cities, id=CityProblemID).first()
+        if cityproblem is None:
+            raise AuthenticationFailed("city problem not found or does not belong to you!")
+        if cityproblem.Status ==  'PendingReview':
+            resp = Response({'Status': cityproblem.Status,
+                'PossibleChanges':{'PendingReview',
+                                     'UnderConsideration',
+                                     'IssueResolved'}})
+            return resp
+        elif cityproblem.situation =='UnderConsideration':
+            resp = Response({'Status': cityproblem.Status,
+                'PossibleChanges':{'UnderConsideration',
+                                     'IssueResolved'}})
+            return resp
+        resp = Response({'Status': cityproblem.Status,
+            'PossibleChanges':{'IssueResolved'}})
+        return resp
