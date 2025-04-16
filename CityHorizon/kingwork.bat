@@ -48,4 +48,3 @@ REM Run custom management commands
 python manage.py create_objects
 python manage.py create_users
 python manage.py create_reports
-python manage.py switch_window
