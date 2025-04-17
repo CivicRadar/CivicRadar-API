@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
                                    Notification, MayorPriority)
-from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer
+from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer, \
+    MayorCompleteCityProblemSerializer
 import jwt, datetime
 
 class CitizenReportProblem(APIView):
@@ -140,7 +141,7 @@ class MayorCityReports(APIView):
             raise AuthenticationFailed("User not found!")
         cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
         problems = CityProblem.objects.filter(City__id__in=cities).all()
-        serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
+        serializer = MayorCompleteCityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
 
 class MayorNotes(APIView):
@@ -286,7 +287,9 @@ class MayorDetermineCityProblemSituation(APIView):
             notif = Notification(Message=f'مشکل گزارش شده از طرف شما توسط شهردار مربوطه{mydict[newsituation]}',
                                  Receiver=cityproblem.Reporter,
                                  Sender=user,
-                                 CityProblem=cityproblem)
+                                 CityProblem=cityproblem,
+                                 UpdatedTo=newsituation)
+            notif.full_clean()
             notif.save()
             cityproblem.Status=newsituation
             cityproblem.save()
