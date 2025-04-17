@@ -31,7 +31,7 @@ class CitizenReportProblem(APIView):
                               Picture=request.data['Picture'], Video=request.data['Video'], Longitude=request.data['Longitude'], Latitude=request.data['Latitude'], FullAdress=request.data['FullAdress'])
 
         problem.save()
-        serializer = CityProblemSerializer(problem)
+        serializer = CityProblemSerializer(problem, context={'userID':user.id})
         return Response(serializer.data)
 
     def get(self, request):
@@ -50,7 +50,7 @@ class CitizenReportProblem(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
         problems = CityProblem.objects.filter(Reporter=user).all()
-        serializer = CityProblemSerializer(problems, many=True)
+        serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
 
 class CitizenReportCitizen(APIView):
@@ -102,8 +102,23 @@ class CitizenReportCitizen(APIView):
 class AllCitizenReport(APIView):
     def get(self, request):
         # everybody regradless to their auth token can see all the city problems
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            problems = CityProblem.objects.all()
+            serializer = CityProblemSerializer(problems, many=True)
+            return Response(serializer.data)
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Citizen').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
         problems = CityProblem.objects.all()
-        serializer = CityProblemSerializer(problems, many=True)
+        serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
 
 class MayorCityReports(APIView):
@@ -124,7 +139,7 @@ class MayorCityReports(APIView):
             raise AuthenticationFailed("User not found!")
         cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
         problems = CityProblem.objects.filter(City__id__in=cities).all()
-        serializer = CityProblemSerializer(problems, many=True)
+        serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
 
 class MayorNotes(APIView):
@@ -274,7 +289,7 @@ class MayorDetermineCityProblemSituation(APIView):
             notif.save()
             cityproblem.Status=newsituation
             cityproblem.save()
-        serializer = CityProblemSerializer(cityproblem)
+        serializer = CityProblemSerializer(cityproblem, context={'userID':user.id})
         return Response(serializer.data)
 
     def get(self, request):

@@ -2,7 +2,8 @@ from datetime import timedelta
 
 from django.db.models import Count, Max
 from rest_framework import serializers
-from Authentication.models import User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities, MayorNote
+from Authentication.models import (User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities,
+                                   MayorNote, CityProblemReaction)
 import datetime
 
 class CityProblemSerializer(serializers.Serializer):
@@ -21,6 +22,23 @@ class CityProblemSerializer(serializers.Serializer):
     Latitude = serializers.FloatField()
     FullAdress = serializers.CharField()
     Status = serializers.CharField()
+    Likes = serializers.SerializerMethodField()
+    Dislikes = serializers.SerializerMethodField()
+    YourReaction = serializers.SerializerMethodField()
+
+    def get_Likes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=True).count()
+
+    def get_Dislikes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=False).count()
+
+    def get_YourReaction(self, obj):
+        if 'userID' in self.context:
+            myobject = CityProblemReaction.objects.filter(CityProblem=obj, Reactor__id=self.context['userID']).first()
+            if myobject is None:
+                return None
+            return myobject.Like
+        return None
 
 class ReportCitizenSerializer(serializers.Serializer):
     id = serializers.IntegerField()
