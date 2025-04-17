@@ -12,7 +12,7 @@ if exist "%markerFile%" (
     REM Read the stored hash from the marker file
     set "storedHash="
     for /f "usebackq delims=" %%L in ("%markerFile%") do set "storedHash=%%L"
-    
+
     REM Compare the hashes
     if "!storedHash!"=="!latestHash!" (
         echo Commit hash found. Running normal behavior...
@@ -66,6 +66,14 @@ if exist "%markerFile%" (
         )
 
         echo All initial migration files have been removed.
+
+        REM Delete all folders in the Media directory while preserving files
+        echo Deleting folders in Media directory...
+        for /d %%D in (Media\*) do (
+            rmdir /s /q "%%D"
+            echo Deleted folder: %%D
+        )
+        echo All folders in Media directory have been deleted.
 
         REM Run Django makemigrations and migrate
         python manage.py makemigrations
@@ -131,6 +139,14 @@ if exist "%markerFile%" (
     )
 
     echo All initial migration files have been removed.
+
+    REM Delete all folders in the Media directory while preserving files
+    echo Deleting folders in Media directory...
+    for /d %%D in (Media\*) do (
+        rmdir /s /q "%%D"
+        echo Deleted folder: %%D
+    )
+    echo All folders in Media directory have been deleted.
 
     REM Run Django makemigrations and migrate
     python manage.py makemigrations
