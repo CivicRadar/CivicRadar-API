@@ -112,4 +112,4 @@ class MayorPriority(models.Model):
     CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, related_name='CityProblemMayorPriority')
     Priority = models.CharField(max_length=20, choices=priority_type, default='Low')
     class Meta:
-        unique_together = ('Mayor', 'Priority')
+        unique_together = ('Mayor', 'CityProblem')
