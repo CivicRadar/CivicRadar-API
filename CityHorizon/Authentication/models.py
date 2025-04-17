@@ -96,3 +96,15 @@ class CityProblemReaction(models.Model):
     Reactor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Reactor')
     class Meta:
         unique_together = ('CityProblem', 'Reactor')
+
+class MayorPriority(models.Model):
+    priority_type = [
+        ('Low', 'Low'),
+        ('Medium', 'Medium'),
+        ('High', 'High'),
+    ]
+    Mayor = models.ForeignKey(User, on_delete=models.CASCADE)
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, related_name='CityProblemMayorPriority')
+    Priority = models.CharField(max_length=20, choices=priority_type, default='Low')
+    class Meta:
+        unique_together = ('Mayor', 'Priority')

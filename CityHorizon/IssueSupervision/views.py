@@ -4,8 +4,9 @@ from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from Authentication.models import CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote, Notification
-from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer
+from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
+                                   Notification, MayorPriority)
+from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer
 import jwt, datetime
 
 class CitizenReportProblem(APIView):
@@ -325,3 +326,54 @@ class MayorDetermineCityProblemSituation(APIView):
         resp = Response({'Status': cityproblem.Status,
             'PossibleChanges':{'IssueResolved'}})
         return resp
+
+class MayorPrioritize(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+        cityproblem = CityProblem.objects.filter(City__id__in=cities, id=request.data['CityProblemID']).first()
+        if cityproblem is None:
+            raise AuthenticationFailed("city problem not found or does not belong to you!")
+        mayorprio = MayorPriority.objects.filter(Mayor=user, CityProblem=cityproblem).first()
+        if mayorprio is not None:
+            mayorprio.Priority = request.data['Priority']
+            mayorprio.full_clean()
+            mayorprio.save()
+            serializer = MayorPrioritySerializer(cityproblem, context={'userID': user.id})
+            return Response(serializer.data)
+        prio = MayorPriority(Mayor=user, CityProblem=cityproblem, Priority=request.data['Priority'])
+        prio.full_clean()
+        prio.save()
+        serializer = MayorPrioritySerializer(cityproblem, context={'userID': user.id})
+        return Response(serializer.data)
+
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+        cityproblem = CityProblem.objects.filter(City__id__in=cities).all()
+        serializer = MayorPrioritySerializer(cityproblem, many=True, context={'userID': user.id})
+        return Response(serializer.data)

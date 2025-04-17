@@ -62,7 +62,7 @@ class Like(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Expired token!")
 
-        user = User.objects.filter(id=payload['id'], Type='Citizen').first()
+        user = User.objects.filter(id=payload['id']).first()
         if user is None:
             raise AuthenticationFailed("User not found!")
         cityproblem = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
@@ -94,7 +94,7 @@ class Like(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Expired token!")
 
-        user = User.objects.filter(id=payload['id'], Type='Citizen').first()
+        user = User.objects.filter(id=payload['id']).first()
         if user is None:
             raise AuthenticationFailed("User not found!")
         cityproblem = CityProblem.objects.filter(id=request.query_params['CityProblemID']).first()
