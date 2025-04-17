@@ -89,3 +89,10 @@ class Notification(models.Model):
     Date = models.DateTimeField(auto_now_add=True)
     Seen = models.BooleanField(default=False)
     Sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Sender')
+
+class CityProblemReaction(models.Model):
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, related_name='CivicProblem')
+    Like = models.BooleanField()
+    Reactor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Reactor')
+    class Meta:
+        unique_together = ('CityProblem', 'Reactor')
