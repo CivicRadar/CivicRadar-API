@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import CitizenReportProblem, CitizenReportCitizen, AllCitizenReport, MayorCityReports, \
-                   MayorNotes, MayorDetermineCityProblemSituation
+                   MayorNotes, MayorDetermineCityProblemSituation, MayorPrioritize
 
 urlpatterns = [
     path('citizen-report-problem/', CitizenReportProblem.as_view()),
@@ -9,4 +9,5 @@ urlpatterns = [
     path('mayor-watch-report/', MayorCityReports.as_view()),
     path('mayor-note/', MayorNotes.as_view()),
     path('mayor-determine-cityproblem-situation/', MayorDetermineCityProblemSituation.as_view()),
+    path('mayor-prioritize/', MayorPrioritize.as_view()),
 ]

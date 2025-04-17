@@ -3,8 +3,11 @@ from datetime import timedelta
 from django.db.models import Count, Max
 from rest_framework import serializers
 from Authentication.models import (User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities,
-                                   MayorNote, CityProblemReaction)
+                                   MayorNote, CityProblemReaction, MayorPriority)
 import datetime
+
+from rest_framework.exceptions import AuthenticationFailed
+
 
 class CityProblemSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -69,3 +72,44 @@ class NoteSerializer(serializers.Serializer):
                 return True
             return False
         return None
+
+class MayorPrioritySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Information = serializers.CharField()
+    Type = serializers.CharField()
+    Picture = serializers.ImageField()
+    Video = serializers.FileField()
+    DateTime = serializers.DateTimeField()
+    CityID = serializers.IntegerField(source='City.id')
+    CityName = serializers.CharField(source='City.Name')
+    ProvinceName = serializers.CharField(source='City.Province.Name')
+    ReporterID = serializers.IntegerField(source='Reporter.id')
+    ReporterName = serializers.CharField(source='Reporter.FullName')
+    Longitude = serializers.FloatField()
+    Latitude = serializers.FloatField()
+    FullAdress = serializers.CharField()
+    Status = serializers.CharField()
+    Likes = serializers.SerializerMethodField()
+    Dislikes = serializers.SerializerMethodField()
+    YourReaction = serializers.SerializerMethodField()
+    Priority = serializers.SerializerMethodField()
+
+    def get_Likes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=True).count()
+
+    def get_Dislikes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=False).count()
+
+    def get_YourReaction(self, obj):
+        if 'userID' in self.context:
+            myobject = CityProblemReaction.objects.filter(CityProblem=obj, Reactor__id=self.context['userID']).first()
+            if myobject is None:
+                return None
+            return myobject.Like
+        return None
+
+    def get_Priority(self, obj):
+        prio = MayorPriority.objects.filter(Mayor__id=self.context['userID'], CityProblem=obj).first()
+        if prio is None:
+            return None
+        return prio.Priority
