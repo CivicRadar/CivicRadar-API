@@ -99,6 +99,7 @@ class CityProblemReaction(models.Model):
     CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
     Like = models.BooleanField()
     Reactor = models.ForeignKey(User, on_delete=models.CASCADE)
+    Date = models.DateTimeField(auto_now=True)
     class Meta:
         unique_together = ('CityProblem', 'Reactor')
 
