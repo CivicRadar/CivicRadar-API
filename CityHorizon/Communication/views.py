@@ -4,7 +4,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import User, Notification, CityProblemReaction, CityProblem
-from .serializers import NotoficationSerializer, CityProblemReactionSerializer
+from .serializers import NotoficationSerializer, CityProblemReactionSerializer, PointsSerializer
 import jwt, datetime
 
 
@@ -104,3 +104,21 @@ class Like(APIView):
         if react is None:
             return Response({"Like":None})
         return Response({"Like":react.Like})
+
+class Points(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Citizen').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        serializer =  PointsSerializer(user, context={'request':request})
+        return Response(serializer.data)
