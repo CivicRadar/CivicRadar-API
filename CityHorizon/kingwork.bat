@@ -47,6 +47,12 @@ if exist "%markerFile%" (
                     set "appName=%%~nxa"
                 )
                 python manage.py migrate !appName! zero
+                if !ERRORLEVEL! neq 0 (
+                    echo Error: Failed to migrate !appName! to zero.
+                    echo Arsalan: There is a problem in models.py file that you changed. fix it or contact me.
+                    pause
+                    exit /b !ERRORLEVEL!
+                )
             )
         )
 
@@ -77,13 +83,41 @@ if exist "%markerFile%" (
 
         REM Run Django makemigrations and migrate
         python manage.py makemigrations
+        if !ERRORLEVEL! neq 0 (
+            echo Error: Failed to create migrations.
+            pause
+            exit /b !ERRORLEVEL!
+        )
         echo Migrations have been created.
 
         python manage.py migrate
+        if !ERRORLEVEL! neq 0 (
+            echo Error: Failed to apply migrations.
+            pause
+            exit /b !ERRORLEVEL!
+        )
         echo Migrated to PostgreSQL
+
         python manage.py create_objects
+        if !ERRORLEVEL! neq 0 (
+            echo Error: Failed to create objects.
+            pause
+            exit /b !ERRORLEVEL!
+        )
+
         python manage.py create_users
+        if !ERRORLEVEL! neq 0 (
+            echo Error: Failed to create users.
+            pause
+            exit /b !ERRORLEVEL!
+        )
+
         python manage.py create_reports
+        if !ERRORLEVEL! neq 0 (
+            echo Error: Failed to create reports.
+            pause
+            exit /b !ERRORLEVEL!
+        )
 
         REM Update marker file with new hash
         echo|set /p="!latestHash!" > "%markerFile%"
@@ -120,6 +154,12 @@ if exist "%markerFile%" (
                 set "appName=%%~nxa"
             )
             python manage.py migrate !appName! zero
+            if !ERRORLEVEL! neq 0 (
+                echo Error: Failed to migrate !appName! to zero.
+                echo Arsalan: There is a problem in models.py file that you changed. fix it or contact me.
+                pause
+                exit /b !ERRORLEVEL!
+            )
         )
     )
 
@@ -150,13 +190,41 @@ if exist "%markerFile%" (
 
     REM Run Django makemigrations and migrate
     python manage.py makemigrations
+    if !ERRORLEVEL! neq 0 (
+        echo Error: Failed to create migrations.
+        pause
+        exit /b !ERRORLEVEL!
+    )
     echo Migrations have been created.
 
     python manage.py migrate
+    if !ERRORLEVEL! neq 0 (
+        echo Error: Failed to apply migrations.
+        pause
+        exit /b !ERRORLEVEL!
+    )
     echo Migrated to PostgreSQL
+
     python manage.py create_objects
+    if !ERRORLEVEL! neq 0 (
+        echo Error: Failed to create objects.
+        pause
+        exit /b !ERRORLEVEL!
+    )
+
     python manage.py create_users
+    if !ERRORLEVEL! neq 0 (
+        echo Error: Failed to create users.
+        pause
+        exit /b !ERRORLEVEL!
+    )
+
     python manage.py create_reports
+    if !ERRORLEVEL! neq 0 (
+        echo Error: Failed to create reports.
+        pause
+        exit /b !ERRORLEVEL!
+    )
 
     REM Create marker file with current hash
     echo|set /p="!latestHash!" > "%markerFile%"

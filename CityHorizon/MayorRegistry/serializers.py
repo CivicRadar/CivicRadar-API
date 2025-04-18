@@ -1,9 +1,10 @@
 from datetime import timedelta
-
+from django.db.models.functions import TruncMonth
 from django.db.models import Count, Max
 from rest_framework import serializers
 from Authentication.models import Provinces, Cities, CityProblem, MayorCities, User, Notification
 import datetime
+from django.utils import timezone
 
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,7 +51,7 @@ class MayorComplexSerializer(serializers.ModelSerializer):
         current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         counter_current = Notification.objects.filter(Sender=obj, Date__gte=current_month).count()
         last_month = (current_month - timedelta(days=1) ).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        counter_last = Notification.objects.filter(Sender=obj, Date__gte=last_month, Date__lte=current_month).count()
+        counter_last = Notification.objects.filter(Sender=obj, Date__gte=last_month, Date__lt=current_month).count()
         if counter_current>counter_last:
             return int(100 *(counter_current-counter_last)/counter_current)
         elif counter_last == 0:
@@ -64,13 +65,20 @@ class MayorComplexSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_maximum_monthly_report_check(self, obj):
-        now = datetime.datetime.now()
-        current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        maximum = Notification.objects.filter(Date__gte=current_month, Sender=obj).values('Sender__id').annotate(cooperation_count=Count('Sender__id')).aggregate(max_cooperation=Max('cooperation_count'))
-        return maximum['max_cooperation']
+        # Aggregate notifications by month for the sender
+        monthly_counts = (
+            Notification.objects
+            .filter(Sender=obj)
+            .annotate(month=TruncMonth('Date'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+        # Return the maximum count, or 0 if no notifications exist
+        return monthly_counts[0]['count'] if monthly_counts.exists() else 0
 
     def get_LastCooperation(self, obj):
-        notif = Notification.objects.filter(Sender=obj).order_by('Date').first()
-        if notif is None:
-            return None
-        return notif.Date
+        # Find the latest notification date for the sender
+        latest_notification = Notification.objects.filter(Sender=obj).aggregate(last_date=Max('Date'))
+        # Return the last date if it exists, otherwise None
+        return latest_notification['last_date']

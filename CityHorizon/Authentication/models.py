@@ -89,16 +89,16 @@ class Notification(models.Model):
     ]
     Message = models.CharField(max_length=1000)
     Receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Receiver')
-    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, related_name='CityProblem')
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
     UpdatedTo = models.CharField(max_length=30, choices=update_type)
     Date = models.DateTimeField(auto_now_add=True)
     Seen = models.BooleanField(default=False)
     Sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Sender')
 
 class CityProblemReaction(models.Model):
-    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, related_name='CivicProblem')
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
     Like = models.BooleanField()
-    Reactor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Reactor')
+    Reactor = models.ForeignKey(User, on_delete=models.CASCADE)
     class Meta:
         unique_together = ('CityProblem', 'Reactor')
 
@@ -109,7 +109,7 @@ class MayorPriority(models.Model):
         ('High', 'High'),
     ]
     Mayor = models.ForeignKey(User, on_delete=models.CASCADE)
-    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, related_name='CityProblemMayorPriority')
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
     Priority = models.CharField(max_length=20, choices=priority_type, default='Low')
     class Meta:
         unique_together = ('Mayor', 'CityProblem')
