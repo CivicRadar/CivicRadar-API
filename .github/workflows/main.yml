@@ -16,7 +16,9 @@ jobs:
    - name: Checking out from source control
      uses: actions/checkout@v3
    - name: Installing dependencies
-     run: bash -c "./tools/install_depndencies.bash && service postgresql start"
+     run: ./tools/install_depndencies.bash
+   - name: Running postgresql
+     run: service postgresql start
    - name: Creating venv
      run: bash -c "python3 -m venv .venv && source .venv/bin/activate && pip install -r CityHorizon/requirements.txt"
    - name: Run Tests
