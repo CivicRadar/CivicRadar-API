@@ -1,0 +1,23 @@
+name: Build and Deploy CivilRadar Api
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+  workflow_call:
+
+jobs:
+ build-and-deploy:
+   name: Build and Deploy
+   runs-on: ubuntu-24.04
+   container: 
+   steps:
+   - name: Checking out from source control
+     uses: actions/checkout@v3
+   - name: Installing dependencies
+     run: bash -c "./tools/install_depndencies.bash && service postgresql start"
+   - name: Creating venv
+     run: bash -c "python3 -m venv .venv && source .venv/bin/activate && pip install -r CityHorizon/requirements.txt"
+   - name: Run Tests
+     run: ./manage.py test Authentication.tests --exclude-tag=unstable --parallel
