@@ -1,9 +1,10 @@
 from datetime import timedelta
-
+from django.db.models.functions import TruncMonth
 from django.db.models import Count, Max
 from rest_framework import serializers
-from Authentication.models import Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities, User
+from Authentication.models import Provinces, Cities, CityProblem, MayorCities, User, Notification
 import datetime
+from django.utils import timezone
 
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,6 +35,7 @@ class MayorComplexSerializer(serializers.ModelSerializer):
     monthly_report_check_percentage = serializers.SerializerMethodField()
     cities = serializers.SerializerMethodField()
     maximum_monthly_report_check = serializers.SerializerMethodField()
+    LastCooperation = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = ['id', 'FullName', 'Email', 'LastCooperation', 'monthly_report_check', 'monthly_report_check_percentage', 'maximum_monthly_report_check', 'cities']
@@ -41,19 +43,19 @@ class MayorComplexSerializer(serializers.ModelSerializer):
     def get_monthly_report_check(self, obj):
         now = datetime.datetime.now()
         current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        counter = CityProblemProsecute.objects.filter(Prosecuter=obj, DateTime__gte=current_month).count()
+        counter = Notification.objects.filter(Sender=obj, Date__gte=current_month).count()
         return counter
 
     def get_monthly_report_check_percentage(self, obj):
         now = datetime.datetime.now()
         current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        counter_current = CityProblemProsecute.objects.filter(Prosecuter=obj, DateTime__gte=current_month).count()
+        counter_current = Notification.objects.filter(Sender=obj, Date__gte=current_month).count()
         last_month = (current_month - timedelta(days=1) ).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        counter_last = CityProblemProsecute.objects.filter(Prosecuter=obj, DateTime__gte=last_month, DateTime__lt=current_month).count()
-        if counter_last == 0:
-            return 0
+        counter_last = Notification.objects.filter(Sender=obj, Date__gte=last_month, Date__lt=current_month).count()
         if counter_current>counter_last:
-            int(100 *(counter_current-counter_last)/counter_current)
+            return int(100 *(counter_current-counter_last)/counter_current)
+        elif counter_last == 0:
+            return 0
         return int(100 *(counter_current-counter_last) / counter_last)
 
     def get_cities(self, obj):
@@ -63,7 +65,20 @@ class MayorComplexSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_maximum_monthly_report_check(self, obj):
-        now = datetime.datetime.now()
-        current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        maximum = CityProblemProsecute.objects.filter(DateTime__gte=current_month).values('Prosecuter__id').annotate(cooperation_count=Count('Prosecuter__id')).aggregate(max_cooperation=Max('cooperation_count'))
-        return maximum['max_cooperation']
+        # Aggregate notifications by month for the sender
+        monthly_counts = (
+            Notification.objects
+            .filter(Sender=obj)
+            .annotate(month=TruncMonth('Date'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+        # Return the maximum count, or 0 if no notifications exist
+        return monthly_counts[0]['count'] if monthly_counts.exists() else 0
+
+    def get_LastCooperation(self, obj):
+        # Find the latest notification date for the sender
+        latest_notification = Notification.objects.filter(Sender=obj).aggregate(last_date=Max('Date'))
+        # Return the last date if it exists, otherwise None
+        return latest_notification['last_date']

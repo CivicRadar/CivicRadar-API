@@ -1,19 +1,18 @@
 import copy
-from typing import override
-import django
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import force_str, DjangoUnicodeDecodeError
+from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-from django.http import HttpResponseBadRequest
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, NotFound
+from rest_framework.exceptions import AuthenticationFailed
 
 from .models import User
-from .utils import Util
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['FullName', 'Email', 'Password', 'Type', 'Verified']
+        extra_kwargs = {
+            'Password': {'write_only': True}
+        }
 
     def create(self, validated_data):
         Password = validated_data.pop('Password', None)
@@ -28,32 +27,15 @@ class UserSerializer(serializers.ModelSerializer):
         new_data[key] = value
         return new_data
 
-    @override
-    def is_valid(self):
-        super().is_valid()
-        REQUIRED_FIELDS = ['FullName', 'Email', 'Password', 'Type']
-        Util.is_contain_required_fields(self.data, REQUIRED_FIELDS)
-        if User.objects.filter(Email=self.data['Email']).exists():
-            raise serializers.ValidationError("user with this Email already exists.")
-        return self.data
 
 class UserIDSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'FullName', 'Email', 'Type']
 
-class RequestPasswordResetSerializer(serializers.Serializer):
-    Email = serializers.CharField()
-    Type = serializers.CharField()
-    class Meta:
-        model = User
-        fields = ['Email', 'Type']
-
-    @override
-    def is_valid(self):
-        super().is_valid()
-        REQUIRED_FIELDS = ['Email', 'Type']
-        Util.is_contain_required_fields(self.data, REQUIRED_FIELDS)
+class ResetPasswordRequestSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        return super().validate(attrs)
 
 class SetNewPasswordSerializer(serializers.Serializer):
     Password = serializers.CharField(min_length=3, write_only=True)
@@ -72,14 +54,11 @@ class SetNewPasswordSerializer(serializers.Serializer):
         if password != confpas:
             raise AuthenticationFailed('Passwords do not match')
 
-        try:
-            id=force_str(urlsafe_base64_decode(ui64))
-            user = User.objects.get(id=id)
+        id=force_str(urlsafe_base64_decode(ui64))
+        user = User.objects.get(id=id)
 
-            if not PasswordResetTokenGenerator().check_token(user, token):
-                raise AuthenticationFailed('The reset link is invalid')
-        except DjangoUnicodeDecodeError:
-            raise AuthenticationFailed("could not decode token")
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            raise AuthenticationFailed('The reset link is invalid')
 
         user.set_password(password)
         user.save()
@@ -100,9 +79,3 @@ class ProfileSerializer(serializers.ModelSerializer):
         elif obj.Type == 'Admin':
             return 'ادمین'
         return None
-
-    @override
-    def is_valid(self):
-        super().is_valid()
-        REQUIRED_FIELDS = ['FullName']
-        Util.is_contain_required_fields(self.data, REQUIRED_FIELDS)

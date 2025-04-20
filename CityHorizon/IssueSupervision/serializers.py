@@ -1,9 +1,9 @@
 from datetime import timedelta
-
 from django.db.models import Count, Max
 from rest_framework import serializers
-from Authentication.models import User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities, MayorNote
-import datetime
+from Authentication.models import (User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities,
+                                   MayorNote, CityProblemReaction, MayorPriority, Notification)
+
 
 class CityProblemSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -20,6 +20,24 @@ class CityProblemSerializer(serializers.Serializer):
     Longitude = serializers.FloatField()
     Latitude = serializers.FloatField()
     FullAdress = serializers.CharField()
+    Status = serializers.CharField()
+    Likes = serializers.SerializerMethodField()
+    Dislikes = serializers.SerializerMethodField()
+    YourReaction = serializers.SerializerMethodField()
+
+    def get_Likes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=True).count()
+
+    def get_Dislikes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=False).count()
+
+    def get_YourReaction(self, obj):
+        if 'userID' in self.context:
+            myobject = CityProblemReaction.objects.filter(CityProblem=obj, Reactor__id=self.context['userID']).first()
+            if myobject is None:
+                return None
+            return myobject.Like
+        return None
 
 class ReportCitizenSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -50,3 +68,122 @@ class NoteSerializer(serializers.Serializer):
                 return True
             return False
         return None
+
+class MayorPrioritySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Information = serializers.CharField()
+    Type = serializers.CharField()
+    Picture = serializers.ImageField()
+    Video = serializers.FileField()
+    DateTime = serializers.DateTimeField()
+    CityID = serializers.IntegerField(source='City.id')
+    CityName = serializers.CharField(source='City.Name')
+    ProvinceName = serializers.CharField(source='City.Province.Name')
+    ReporterID = serializers.IntegerField(source='Reporter.id')
+    ReporterName = serializers.CharField(source='Reporter.FullName')
+    Longitude = serializers.FloatField()
+    Latitude = serializers.FloatField()
+    FullAdress = serializers.CharField()
+    Status = serializers.CharField()
+    Likes = serializers.SerializerMethodField()
+    Dislikes = serializers.SerializerMethodField()
+    YourReaction = serializers.SerializerMethodField()
+    Priority = serializers.SerializerMethodField()
+
+    def get_Likes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=True).count()
+
+    def get_Dislikes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=False).count()
+
+    def get_YourReaction(self, obj):
+        if 'userID' in self.context:
+            myobject = CityProblemReaction.objects.filter(CityProblem=obj, Reactor__id=self.context['userID']).first()
+            if myobject is None:
+                return None
+            return myobject.Like
+        return None
+
+    def get_Priority(self, obj):
+        prio = MayorPriority.objects.filter(Mayor__id=self.context['userID'], CityProblem=obj).first()
+        if prio is None:
+            return None
+        return prio.Priority
+
+class NotifMayorSerializer(serializers.Serializer):
+    id = serializers.IntegerField(source='Sender.id')
+    FulllName = serializers.CharField(source='Sender.FullName')
+    Email = serializers.CharField(source='Sender.Email')
+    Picture = serializers.ImageField(source='Sender.Picture')
+    Date = serializers.DateTimeField()
+
+class MayorCompleteCityProblemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Information = serializers.CharField()
+    Type = serializers.CharField()
+    Picture = serializers.ImageField()
+    Video = serializers.FileField()
+    DateTime = serializers.DateTimeField()
+    CityID = serializers.IntegerField(source='City.id')
+    CityName = serializers.CharField(source='City.Name')
+    ProvinceName = serializers.CharField(source='City.Province.Name')
+    ReporterID = serializers.IntegerField(source='Reporter.id')
+    ReporterName = serializers.CharField(source='Reporter.FullName')
+    ReporterEmail = serializers.CharField(source='Reporter.Email')
+    ReporterPicture = serializers.ImageField(source='Reporter.Picture')
+    Longitude = serializers.FloatField()
+    Latitude = serializers.FloatField()
+    FullAdress = serializers.CharField()
+    Status = serializers.CharField()
+    Likes = serializers.SerializerMethodField()
+    Dislikes = serializers.SerializerMethodField()
+    YourReaction = serializers.SerializerMethodField()
+    Priority = serializers.SerializerMethodField()
+    Verified = serializers.SerializerMethodField()
+    VerificationDate = serializers.SerializerMethodField()
+    ConsideredByMayor = serializers.SerializerMethodField()
+    ResolvedByMayor = serializers.SerializerMethodField()
+
+    def get_Likes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=True).count()
+
+    def get_Dislikes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=False).count()
+
+    def get_YourReaction(self, obj):
+        if 'userID' in self.context:
+            myobject = CityProblemReaction.objects.filter(CityProblem=obj, Reactor__id=self.context['userID']).first()
+            if myobject is None:
+                return None
+            return myobject.Like
+        return None
+
+    def get_Priority(self, obj):
+        prio = MayorPriority.objects.filter(Mayor__id=self.context['userID'], CityProblem=obj).first()
+        if prio is None:
+            return None
+        return prio.Priority
+
+    def get_Verified(self, obj):
+        return True
+
+    def get_VerificationDate(self, obj):
+        return obj.DateTime
+
+    def get_ConsideredByMayor(self, obj):
+        conotif = Notification.objects.filter(Sender__id=self.context['userID'], UpdatedTo='UnderConsideration',
+                                              CityProblem=obj).first()
+        if conotif is None:
+            resnotif = Notification.objects.filter(Sender__id=self.context['userID'], UpdatedTo='IssueResolved',
+                                                   CityProblem=obj).first()
+            if resnotif is None:
+                return None
+            return NotifMayorSerializer(resnotif).data
+        return NotifMayorSerializer(conotif).data
+
+    def get_ResolvedByMayor(self, obj):
+        resnotif = Notification.objects.filter(Sender__id=self.context['userID'], UpdatedTo='IssueResolved',
+                                               CityProblem=obj).first()
+        if resnotif is None:
+            return None
+        return NotifMayorSerializer(resnotif).data
