@@ -168,19 +168,16 @@ class Profile(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
 
-        profile_serializer = ProfileSerializer(data=request.data)
-        try:
-            profile_serializer.is_valid()
-            user.FullName = profile_serializer.data['FullName']
-            picture = request.FILES.get('Picture')
-            if picture:
-                user.Picture = picture
-            # در غیر این صورت، فایلی نیومده، عکس قبلی بمونه
-            user.save()
-            serializer = ProfileSerializer(user)
-            return Response(serializer.data)
-        except serializers.ValidationError as e:
-            return HttpResponseBadRequest(e.detail)
+        user.FullName = request.data.get('FullName', user.FullName)
+
+        picture = request.FILES.get('Picture')
+        if picture:
+            user.Picture = picture
+        # در غیر این صورت، فایلی نیومده، عکس قبلی بمونه
+
+        user.save()
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)
 
     def delete(self, request):
         token = request.COOKIES.get('jwt')
