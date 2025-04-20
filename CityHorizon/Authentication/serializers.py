@@ -1,5 +1,5 @@
 import copy
-from typing_extensions import override
+from typing import override
 import django
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str, DjangoUnicodeDecodeError

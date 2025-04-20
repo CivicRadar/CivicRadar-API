@@ -175,9 +175,8 @@ class Profile(APIView):
         try:
             profile_serializer.is_valid()
             user.FullName = profile_serializer.data['FullName']
-            picture = request.FILES.get('Picture')
-            if picture:
-                user.Picture = picture
+            if 'Picture' in profile_serializer.data.keys() and profile_serializer.data['Picture']:
+                user.Picture = profile_serializer.data['Picture'].name
             # در غیر این صورت، فایلی نیومده، عکس قبلی بمونه
             user.save()
             serializer = ProfileSerializer(user)
