@@ -5,10 +5,12 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
-                                   Notification, MayorPriority)
+                                   Notification, MayorPriority, Organization)
 from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer, \
-    MayorCompleteCityProblemSerializer
+    MayorCompleteCityProblemSerializer, OrganizationSerializer
 import jwt, datetime
+
+
 
 class CitizenReportProblem(APIView):
     def post(self, request):
@@ -380,3 +382,28 @@ class MayorPrioritize(APIView):
         cityproblem = CityProblem.objects.filter(City__id__in=cities).all()
         serializer = MayorPrioritySerializer(cityproblem, many=True, context={'userID': user.id})
         return Response(serializer.data)
+
+class MayorDelegate(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        cityprobe_id = request.query_params.get('CityProblemID')
+        cityprobe = CityProblem.objects.filter(id=cityprobe_id).first()
+        if cityprobe is None:
+            raise AuthenticationFailed("city problem not found or does not belong to you!")
+
+        organs = Organization.objects.filter(City=cityprobe.City).all()
+        Serializer = OrganizationSerializer(organs, many=True)
+        return Response(Serializer.data)
