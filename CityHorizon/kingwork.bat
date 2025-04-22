@@ -119,6 +119,13 @@ if exist "%markerFile%" (
             exit /b !ERRORLEVEL!
         )
 
+        python manage.py create_organs
+        if !ERRORLEVEL! neq 0 (
+            echo Error: Failed to create organs.
+            pause
+            exit /b !ERRORLEVEL!
+        )
+
         REM Update marker file with new hash
         echo|set /p="!latestHash!" > "%markerFile%"
 
@@ -222,6 +229,13 @@ if exist "%markerFile%" (
     python manage.py create_reports
     if !ERRORLEVEL! neq 0 (
         echo Error: Failed to create reports.
+        pause
+        exit /b !ERRORLEVEL!
+    )
+
+    python manage.py create_organs
+    if !ERRORLEVEL! neq 0 (
+        echo Error: Failed to create organs.
         pause
         exit /b !ERRORLEVEL!
     )

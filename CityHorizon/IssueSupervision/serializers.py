@@ -187,3 +187,12 @@ class MayorCompleteCityProblemSerializer(serializers.Serializer):
         if resnotif is None:
             return None
         return NotifMayorSerializer(resnotif).data
+
+class OrganizationSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Type = serializers.CharField()
+    OrganHead_FullName = serializers.CharField()
+    OrganHead_Email = serializers.EmailField()
+    OrganHead_Number = serializers.CharField()
+    CityName = serializers.CharField(source='City.Name')
+    ProvinceName = serializers.CharField(source='City.Province.Name')
