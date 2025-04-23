@@ -124,6 +124,7 @@ class Organization(models.Model):
     ]
 
     Type = models.CharField(max_length=20, choices=organ_type)
+    Owner = models.ForeignKey(User, on_delete=models.CASCADE)
     OrganHead_FullName = models.CharField(max_length=100)
     OrganHead_Email = models.EmailField()
     OrganHead_Number = models.CharField(max_length=15)
