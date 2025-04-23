@@ -11,12 +11,11 @@ jobs:
  build-and-deploy:
    name: Build and Deploy
    runs-on: ubuntu-24.04
-   container: 
    steps:
    - name: Checking out from source control
      uses: actions/checkout@v3
    - name: Installing dependencies
-     run: ./tools/install_depndencies.bash
+     run: ./tools/install_dependencies.bash
    - name: Running postgresql
      run: service postgresql start
    - name: Creating venv
