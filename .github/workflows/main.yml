@@ -23,4 +23,4 @@ jobs:
    - name: Creating venv
      run: bash -c "python3 -m venv .venv && source .venv/bin/activate && pip install -r CityHorizon/requirements.txt"
    - name: Run Tests
-     run: ./manage.py test Authentication.tests --exclude-tag=unstable --parallel
+     run: ./CityHorizon/manage.py test Authentication.tests --exclude-tag=unstable --parallel
