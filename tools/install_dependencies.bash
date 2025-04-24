@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function install_postgres()
 {
     apt install -y postgresql-common
@@ -14,6 +16,8 @@ function install_python()
 
 function main()
 {
+    apt update
+    apt upgrade
     install_postgres
     install_python
 }
