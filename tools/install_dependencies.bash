@@ -12,6 +12,7 @@ function install_postgres()
 function install_python()
 {
     apt install -qy python3 python3-pip python3.12-venv
+    ln -s $(which python3) /usr/bin/python
 }
 
 function main()
