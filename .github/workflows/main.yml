@@ -14,10 +14,11 @@ jobs:
    container:
     image: ubuntu:noble
    steps:
+   - name: Checking out from source control
+     run: bash -c "apt update -y && apt upgrade -y && apt install git -y"
+     uses: actions/checkout@v3
    - name: Installing dependencies
      run: ./tools/install_dependencies.bash
-   - name: Checking out from source control
-     uses: actions/checkout@v3
    - name: Running postgresql
      run: service postgresql start
    - name: Creating venv
