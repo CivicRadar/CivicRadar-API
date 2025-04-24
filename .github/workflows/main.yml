@@ -11,6 +11,8 @@ jobs:
  build-and-deploy:
    name: Build and Deploy
    runs-on: ubuntu-24.04
+   container:
+    image: ubuntu:noble
    steps:
    - name: Checking out from source control
      uses: actions/checkout@v3
