@@ -25,6 +25,6 @@ jobs:
    - name: Creating venv
      run: bash -c "python3 -m venv .venv && source .venv/bin/activate && pip install -r CityHorizon/requirements.txt"
    - name: Run Tests
-     run: bash -c "git config --global --add safe.directory $(realpath CivicRadar-API/CivicRadar-API) &&\
+     run: bash -c "git config --global --add safe.directory $(realpath $(pwd)/CivicRadar-API/CivicRadar-API) &&\
           git checkout b559caa725a2ba484910ef73e8428065985ba730 && source .venv/bin/activate &&\
           ./CityHorizon/manage.py test Authentication.tests --exclude-tag=unstable --parallel"
