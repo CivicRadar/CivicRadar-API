@@ -11,11 +11,13 @@ EXPOSE 8000
 
 RUN apt update -y && apt upgrade -y
 
-RUN apt install -y iproute2 curl unzip
+RUN apt install -y iproute2 curl unzip sudo
 
 WORKDIR /install_dependencies
 
 COPY tools/install_dependencies.bash .
+
+RUN ./install_dependencies.bash && rm -f install_dependencies.bash
 
 WORKDIR /project
 
@@ -27,3 +29,9 @@ RUN python3 -m venv .venv
 
 RUN bash -c "source .venv/bin/activate && pip install -r CityHorizon/requirements.txt"
 
+WORKDIR /runtime_requirements
+
+COPY tools/runtime_requirements.bash .
+
+# entrypoint
+ENTRYPOINT ["./runtime_requirements", " && ", "bash"]
