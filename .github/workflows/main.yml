@@ -43,4 +43,4 @@ jobs:
        push: true
        tags: arta82/civicradar:latest
        build-args: |
-        GIT_BRANCH="${{ github.head_ref }}"
+        GIT_BRANCH=${{ github.head_ref }}
