@@ -17,6 +17,7 @@ function install_python()
 
 function main()
 {
+    apt install -y sudo git
     install_postgres
     install_python
 }
