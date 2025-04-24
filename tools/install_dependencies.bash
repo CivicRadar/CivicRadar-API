@@ -19,6 +19,7 @@ function main()
 {
     apt update -y
     apt upgrade -y
+    apt install git
     install_postgres
     install_python
 }
