@@ -121,7 +121,7 @@ class AllCitizenReport(APIView):
         user = User.objects.filter(id=payload['id'], Type='Citizen').first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        problems = CityProblem.objects.all()
+        problems = CityProblem.objects.filter(Reporter=user).all()
         serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
 
