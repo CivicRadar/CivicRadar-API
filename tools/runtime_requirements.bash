@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -e
-
 DATABASE_NAME="Projectdb"
 DATABASE_PASSWORD="123"
+
+set -e
 
 function start_postgres()
 {

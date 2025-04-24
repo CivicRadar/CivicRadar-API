@@ -11,7 +11,7 @@ EXPOSE 8000
 
 RUN apt update -y && apt upgrade -y
 
-RUN apt install -y iproute2 curl unzip sudo
+RUN apt install -y iproute2 curl unzip sudo git
 
 WORKDIR /install_dependencies
 
