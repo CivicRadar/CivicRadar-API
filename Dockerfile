@@ -32,4 +32,4 @@ WORKDIR /require_runtime_dependencies
 COPY tools/require_runtime_dependencies.bash .
 
 # entrypoint
-ENTRYPOINT ["./require_runtime_dependencies", " && ", "bash"]
+ENTRYPOINT ["./require_runtime_dependencies", " && ", "cd /project/CivicRadar-API && source .venv/bin/activate && cd CityHorizon && ./manage.py makemigrations && ./manage.py migrate && deactivate", "bash"]

@@ -25,4 +25,4 @@ jobs:
    - name: Require test and run time requiremenst
      run: ./tools/require_runtime_dependencies.bash
    - name: Run Tests
-     run: bash -c "git config --global --add safe.directory $(pwd) && git fetch origin && git checkout 5b62af07ac227f2558b7f24d3eec10c300cf1a83 && source .venv/bin/activate && ./CityHorizon/manage.py test Authentication.tests --exclude-tag=unstable --parallel"
+     run: bash -c "git config --global --add safe.directory $(pwd) && git fetch origin && git checkout 5b62af07ac227f2558b7f24d3eec10c300cf1a83 && source .venv/bin/activate && cd CityHorizon && ./manage.py makemigrations && ./manage.py migrate && ./manage.py test Authentication.tests --exclude-tag=unstable --parallel"
