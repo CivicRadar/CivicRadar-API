@@ -33,12 +33,12 @@ jobs:
      if: github.event.pull_request.base.ref == 'main'
      uses: docker/login-action@v2
      with:
-       username: "Arta82"
-       password: "Arash82@13"
+       username: "arta82"
+       password: "dckr_pat_4mtuZB7jRd20RcLnfhYCw29Lpsw"
    - name: Build and push
      if: github.event.pull_request.base.ref == 'main'
      uses: docker/build-push-action@v4
      with:
        context: .
        push: true
-       tags: antonyanlinux/myapp:latest
+       tags: arta82/civicradar:latest
