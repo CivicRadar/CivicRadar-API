@@ -21,7 +21,6 @@ function main()
 {
     start_postgres
     create_database
-    make_django_migrations
 }
 
 main
