@@ -114,3 +114,18 @@ class MayorPriority(models.Model):
     Priority = models.CharField(max_length=20, choices=priority_type, default='Low')
     class Meta:
         unique_together = ('Mayor', 'CityProblem')
+
+class Organization(models.Model):
+    organ_type = [
+        ('Waste', 'Waste'),
+        ('Water', 'Water'),
+        ('Gas', 'Gas'),
+        ('Electricity', 'Electricity'),
+    ]
+
+    Type = models.CharField(max_length=20, choices=organ_type)
+    Owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    OrganHead_FullName = models.CharField(max_length=100)
+    OrganHead_Email = models.EmailField()
+    OrganHead_Number = models.CharField(max_length=15)
+    City = models.ForeignKey(Cities, on_delete=models.CASCADE)

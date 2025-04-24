@@ -81,6 +81,7 @@ class MayorPrioritySerializer(serializers.Serializer):
     ProvinceName = serializers.CharField(source='City.Province.Name')
     ReporterID = serializers.IntegerField(source='Reporter.id')
     ReporterName = serializers.CharField(source='Reporter.FullName')
+    ReporterPicture = serializers.ImageField(source='Reporter.Picture')
     Longitude = serializers.FloatField()
     Latitude = serializers.FloatField()
     FullAdress = serializers.CharField()
@@ -187,3 +188,12 @@ class MayorCompleteCityProblemSerializer(serializers.Serializer):
         if resnotif is None:
             return None
         return NotifMayorSerializer(resnotif).data
+
+class OrganizationSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Type = serializers.CharField()
+    OrganHead_FullName = serializers.CharField()
+    OrganHead_Email = serializers.EmailField()
+    OrganHead_Number = serializers.CharField()
+    CityName = serializers.CharField(source='City.Name')
+    ProvinceName = serializers.CharField(source='City.Province.Name')

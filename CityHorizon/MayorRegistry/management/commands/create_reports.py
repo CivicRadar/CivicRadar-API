@@ -8,60 +8,80 @@ class Command(BaseCommand):
     help = 'Create reports'
     def handle(self, *args, **kwargs):
         mayor = User.objects.filter(Type='Mayor').first()
-        c1 = Cities.objects.filter(id=1).first()
-        c2 = Cities.objects.filter(id=2).first()
-        c3 = Cities.objects.filter(id=3).first()
+        c1 = Cities.objects.filter(id=341).first()
+        c2 = Cities.objects.filter(id=240).first()
+        # c3 = Cities.objects.filter(id=341).first()
         mcity = MayorCities(User=mayor, City=c1)
         mcity.save()
         mcity = MayorCities(User=mayor, City=c2)
         mcity.save()
         citizen = User.objects.filter(Type='Citizen').first()
-        image_path = os.path.join(settings.MEDIA_ROOT, '1.png')
+        image_path = os.path.join(settings.MEDIA_ROOT, '3.jpg')
         video_path = os.path.join(settings.MEDIA_ROOT, '1.mp4')
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
-            cprob = CityProblem(City=c1, Information='There is a problem in the intersection', Reporter=citizen,
-                                Type='Lighting', Longitude=2.33234766, Latitude=43, FullAdress='خیابان میزرایی کوچه سوم غربی')
-            cprob.Picture.save('1.png', django_file, save=False)
+            cprob = CityProblem(City=c1, Information='سطح جاده آسفالت نشده و خطرناک است. لطفاً برای جلوگیری از حوادث اقدام کنید.', Reporter=citizen,
+                                Type='Street', Longitude=2.33234766, Latitude=43, FullAdress='خیابان لاله زار')
+            cprob.Picture.save('3.jpg', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
             cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.full_clean()
             cprob.save()
+        image_path = os.path.join(settings.MEDIA_ROOT, '4.jpg')           
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
-            cprob = CityProblem(City=c2, Information='There is a problem in the street', Reporter=citizen,
-                                Type='Street', Longitude=100, Latitude=97.1, FullAdress='بزرگراه شهید مدنی')
-            cprob.Picture.save('1.png', django_file, save=False)
+            cprob = CityProblem(City=c1, Information='چراغ‌های خیابان از کار افتاده‌اند و شب‌ها کاملا تاریک است', Reporter=citizen,
+                                Type='Lighting', Longitude=100, Latitude=97.1, FullAdress='خیابان ولیعصر، بین خیابان‌های انقلاب و آزادی')
+            cprob.Picture.save('4.jpg', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
             cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.full_clean()
             cprob.save()
+        image_path = os.path.join(settings.MEDIA_ROOT, '5.jpeg')
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
-            cprob = CityProblem(City=c1, Information='There is a problem in the intersection', Reporter=citizen,
-                                Type='Lighting', Longitude=2, Latitude=4, FullAdress='آزادراه حجازی')
-            cprob.Picture.save('1.png', django_file, save=False)
+            cprob = CityProblem(City=c1, Information='زباله‌های زیادی انباشته شده است و این موضوع آلودگی محیط شده است.', Reporter=citizen,
+                                Type='Garbage', Longitude=2, Latitude=4, FullAdress='میدان امام حسین، جلوی فروشگاه آتی شهر')
+            cprob.Picture.save('5.jpeg', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
             cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.full_clean()
             cprob.save()
+        image_path = os.path.join(settings.MEDIA_ROOT, '6.jpg')
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
-            cprob = CityProblem(City=c2, Information='There is a problem in the street', Reporter=citizen,
-                                Type='Street', Longitude=2.33234766, Latitude=43, FullAdress='کمربندی شمالی جنب فروشگاه افق کوروش')
-            cprob.Picture.save('1.png', django_file, save=False)
+            cprob = CityProblem(City=c1, Information='تجهیزات ورزشی پارک آسیب دیده و قابل استفاده نیستند. لطفاً برای تعمیر اقدام کنید.', Reporter=citizen,
+                                Type='Other', Longitude=2.33234766, Latitude=43, FullAdress='محله شهرک غرب')
+            cprob.Picture.save('6.jpg', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
             cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.full_clean()
             cprob.save()
+        image_path = os.path.join(settings.MEDIA_ROOT, '7.jpg')
         with open(image_path, 'rb') as img_file:
             django_file = File(img_file)
-            cprob = CityProblem(City=c3, Information='There is a problem in the intersection', Reporter=citizen,
-                                Type='Lighting', Longitude=0, Latitude=0, FullAdress='فلکه گوهردشت بلوار میرزایی پور')
-            cprob.Picture.save('1.png', django_file, save=False)
+            cprob = CityProblem(City=c2, Information='چراغ‌های مسیرهای پیاده‌روی در باغ لاله‌ها از کار افتاده‌اند.', Reporter=citizen,
+                                Type='Lighting', Longitude=0, Latitude=0, FullAdress='بلوار چمران (جنوب به شمال)، بعد از میدان امام حسین')
+            cprob.Picture.save('7.jpg', django_file, save=False)
         with open(video_path, 'rb') as vid_file:
             django_file = File(vid_file)
             cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.full_clean()
+            cprob.save()
+        image_path = os.path.join(settings.MEDIA_ROOT, '8.jpg')
+        with open(image_path, 'rb') as img_file:
+            django_file = File(img_file)
+            cprob = CityProblem(City=c2, Information='زباله‌های زیادی در کنار سطل‌های زباله زمین بدمینتون باغ فاتح انباشته شده است', Reporter=citizen,
+                                Type='Garbage', Longitude=0, Latitude=0, FullAdress='جهانشهر، جنب بلوار جمهوری، نرسیده به میدان سپاه')
+            cprob.Picture.save('8.jpg', django_file, save=False)
+        with open(video_path, 'rb') as vid_file:
+            django_file = File(vid_file)
+            cprob.Video.save('1.mp4', django_file, save=False)
+            cprob.full_clean()
             cprob.save()
 
         self.stdout.write(self.style.SUCCESS('Successfully created all reports'))

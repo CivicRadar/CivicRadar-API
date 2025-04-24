@@ -133,8 +133,6 @@ class ProvinceList(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
         serializer = UserSerializer(user)
-        if serializer.data['Type']!= 'Admin' and serializer.data['Type']!= 'Citizen':
-            raise AuthenticationFailed("You are Not Admin!")
 
         myprovinces = Provinces.objects.all()
         serializer = ProvinceSerializer(myprovinces, many=True)
@@ -156,8 +154,6 @@ class CityList(APIView):
         if user is None:
             raise AuthenticationFailed("User not found!")
         serializer = UserSerializer(user)
-        if serializer.data['Type']!= 'Admin' and serializer.data['Type']!= 'Citizen':
-            raise AuthenticationFailed("You are Not Admin!")
 
         myprovince = Provinces.objects.filter(id=request.data['ProvinceID']).first()
         if myprovince is None:
