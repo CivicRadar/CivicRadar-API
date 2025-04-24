@@ -5,7 +5,7 @@ set -e
 function install_postgres()
 {
     apt install -y postgresql-common
-    /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh 
+    /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
     apt install postgresql-17 postgresql-client-17 -y
 }
 
