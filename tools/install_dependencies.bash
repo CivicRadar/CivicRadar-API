@@ -5,8 +5,8 @@ set -e
 function install_postgres()
 {
     apt install -y postgresql-common
-    /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
-    apt install postgresql-17 postgresql-client-17
+    /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh 
+    apt install postgresql-17 postgresql-client-17 -y
 }
 
 function install_python()
@@ -16,8 +16,8 @@ function install_python()
 
 function main()
 {
-    apt update
-    apt upgrade
+    apt update -y
+    apt upgrade -y
     install_postgres
     install_python
 }
