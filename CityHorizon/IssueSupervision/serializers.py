@@ -197,3 +197,17 @@ class OrganizationSerializer(serializers.Serializer):
     OrganHead_Number = serializers.CharField()
     CityName = serializers.CharField(source='City.Name')
     ProvinceName = serializers.CharField(source='City.Province.Name')
+
+class CityProblemCountSerializer(serializers.ModelSerializer):
+    problems_count = serializers.IntegerField()
+
+    class Meta:
+        model = Cities
+        fields = ['id', 'Name', 'problems_count']
+
+class ProvinceProblemCountSerializer(serializers.ModelSerializer):
+    problems_count = serializers.IntegerField()
+
+    class Meta:
+        model = Provinces
+        fields = ['id', 'Name', 'problems_count']

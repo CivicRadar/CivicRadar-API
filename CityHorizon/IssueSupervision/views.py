@@ -1,13 +1,14 @@
 from django.contrib.staticfiles.views import serve
+from django.db.models import Count
 from django.shortcuts import render
 from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
-                                   Notification, MayorPriority, Organization)
+                                   Notification, MayorPriority, Organization, Provinces)
 from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer, \
-    MayorCompleteCityProblemSerializer, OrganizationSerializer
+    MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer, ProvinceProblemCountSerializer
 import jwt, datetime
 
 
@@ -567,4 +568,18 @@ class CityReportCount(APIView):
         if city is None:
             raise AuthenticationFailed("There is no such a city")
         problems = CityProblem.objects.filter(City__id=myvar).count()
-        return Response({'count': problems})
+        return Response({'count': problems, 'ProvinceName': city.Province.Name})
+
+class CitiesReportCount(APIView):
+    def get(self, request):
+        query = Cities.objects.annotate(problems_count=Count('cityproblem')).order_by('id')
+        serializer = CityProblemCountSerializer(query, many=True)
+        return Response(serializer.data)
+
+class ProvincesReportCount(APIView):
+    def get(self, request):
+        query = Provinces.objects.annotate(
+            problems_count=Count('cities__cityproblem')
+        ).order_by('Name')
+        serializer = ProvinceProblemCountSerializer(query, many=True)
+        return Response(serializer.data)
