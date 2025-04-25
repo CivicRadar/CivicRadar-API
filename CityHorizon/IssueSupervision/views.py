@@ -525,3 +525,22 @@ class MayorDedicatedReportPage(APIView):
         problems = CityProblem.objects.filter(id=cityprobe_id).first()
         serializer = MayorCompleteCityProblemSerializer(problems, context={'userID':user.id})
         return Response(serializer.data)
+
+class ReportCount(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Mayor').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+        problems = CityProblem.objects.filter(City__id__in=cities).count()
+        return Response({'count': problems})
