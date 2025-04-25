@@ -607,3 +607,12 @@ class ProvincesReportCount(APIView):
         ).order_by('Name')
         serializer = ProvinceProblemCountSerializer(query, many=True)
         return Response(serializer.data)
+
+class ComplexReportCount(APIView):
+    def get(self, request):
+        myvar = request.query_params.get('Province_ID')
+        if myvar is None:
+            raise AuthenticationFailed("variable name is wrong or value is null")
+        query = Cities.objects.filter(Province__id=myvar).annotate(problems_count=Count('cityproblem')).order_by('id')
+        serializer = CityProblemCountSerializer(query, many=True)
+        return Response(serializer.data)
