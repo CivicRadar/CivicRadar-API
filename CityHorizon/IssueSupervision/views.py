@@ -125,6 +125,14 @@ class AllCitizenReport(APIView):
         serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
 
+class PublicReport(APIView):
+    def get(self, request):
+        problem = CityProblem.objects.filter(id=request.query_params.get('CityProblem_ID')).first()
+        if not problem:
+            raise AuthenticationFailed("Problem not found!")
+        serializer = CityProblemSerializer(problem)
+        return Response(serializer.data)
+
 class MayorCityReports(APIView):
     def get(self, request):
         # mayor can get the reports in his/her terriority
