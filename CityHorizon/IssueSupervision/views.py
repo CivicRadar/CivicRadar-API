@@ -570,6 +570,30 @@ class CityReportCount(APIView):
         problems = CityProblem.objects.filter(City__id=myvar).count()
         return Response({'count': problems, 'ProvinceName': city.Province.Name})
 
+class ProvinceReportCount(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type='Citizen').first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        myvar = request.query_params.get('Province_ID')
+        if myvar is None:
+            raise AuthenticationFailed("variable name is wrong or value is null")
+        province = Provinces.objects.filter(id=myvar).first()
+        if province is None:
+            raise AuthenticationFailed("There is no such a city")
+        problems = CityProblem.objects.filter(City__Province__id=myvar).count()
+        return Response({'count': problems})
+
 class CitiesReportCount(APIView):
     def get(self, request):
         query = Cities.objects.annotate(problems_count=Count('cityproblem')).order_by('id')
