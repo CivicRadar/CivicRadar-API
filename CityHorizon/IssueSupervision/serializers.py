@@ -211,3 +211,4 @@ class ProvinceProblemCountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Provinces
         fields = ['id', 'Name', 'problems_count']
+

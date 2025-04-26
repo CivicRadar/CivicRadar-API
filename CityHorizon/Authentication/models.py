@@ -129,3 +129,19 @@ class Organization(models.Model):
     OrganHead_Email = models.EmailField()
     OrganHead_Number = models.CharField(max_length=15)
     City = models.ForeignKey(Cities, on_delete=models.CASCADE)
+
+class Comment(models.Model):
+    Sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    Content = models.CharField(max_length=1000)
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
+    IsAReply = models.BooleanField(default=False)
+    ReplyID = models.IntegerField(default=0)
+    Date = models.DateTimeField(auto_now_add=True)
+
+class CommentReaction(models.Model):
+    Comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    Like = models.BooleanField()
+    Reactor = models.ForeignKey(User, on_delete=models.CASCADE)
+    Date = models.DateTimeField(auto_now=True)
+    class Meta:
+        unique_together = ('Comment', 'Reactor')

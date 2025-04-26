@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import CitizenReportProblem, CitizenReportCitizen, AllCitizenReport, MayorCityReports, \
                    MayorNotes, MayorDetermineCityProblemSituation, MayorPrioritize, MayorDelegate, MayorDedicatedReportPage, \
-                   PublicReport, ReportCount, CityReportCount, CitiesReportCount, ProvincesReportCount, ProvinceReportCount
+                   PublicReport, ReportCount, CityReportCount, CitiesReportCount, ProvincesReportCount, ProvinceReportCount, \
+                   ComplexReportCount
 
 urlpatterns = [
     path('citizen-report-problem/', CitizenReportProblem.as_view()),
@@ -19,4 +20,5 @@ urlpatterns = [
     path('cities-report-count/', CitiesReportCount.as_view()),
     path('provinces-report-count/', ProvincesReportCount.as_view()),
     path('province-report-count/', ProvinceReportCount.as_view()),
+    path('complex-report-count/', ComplexReportCount.as_view()),
 ]

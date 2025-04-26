@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Authentication.models import User, Notification, CityProblemReaction, CityProblem
+from Authentication.models import User, Notification, CityProblemReaction, CityProblem, Comment, CommentReaction
 import datetime
 from django.utils import timezone
 from django.db.models import Count, Case, When, IntegerField, F, Value, CharField
@@ -133,3 +133,40 @@ class PointsSerializer(serializers.Serializer):
         ret = super().to_representation(instance)
         ret['User_Rank'] = getattr(self, '_user_rank', None)
         return ret
+
+class CommentOnlySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    SenderName = serializers.CharField(source='Sender.FullName')
+    SenderPicture = serializers.ImageField(source='Sender.Picture')
+    Content = serializers.CharField()
+
+class CommentSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    SenderName = serializers.CharField(source='Sender.FullName')
+    SenderPicture = serializers.ImageField(source='Sender.Picture')
+    Content = serializers.CharField()
+    Reply = serializers.SerializerMethodField()
+    Likes = serializers.SerializerMethodField()
+    DisLikes = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ['id', 'SenderName', 'SenderPicture', 'Content', 'Reply', 'Likes', 'DisLikes']
+
+    def get_Reply(self, obj):
+        if obj.IsAReply:
+            comment = Comment.objects.filter(CityProblem=obj.CityProblem,id=obj.ReplyID).first()
+            if comment is None:
+                return None
+            return CommentOnlySerializer(comment).data
+        return None
+
+    def get_Likes(self, obj):
+        return CommentReaction.objects.filter(Comment=obj, Like=True).count()
+
+    def get_DisLikes(self, obj):
+        return CommentReaction.objects.filter(Comment=obj, Like=False).count()
+
+class CommentReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommentReaction
+        fields = ['Like']
