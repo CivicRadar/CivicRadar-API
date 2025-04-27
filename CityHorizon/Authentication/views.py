@@ -31,7 +31,7 @@ class SignUp(APIView):
             # ایجاد توکن تأیید ایمیل
             token = signing.dumps({'email_address': email}, salt="my_verification_salt")
 
-            # هدایت کاربر به فرانت‌اند React در localhost:5173
+            # هدایت کاربر به فرانت‌اند React
             frontend_url = f'{config("BASE_HTTP")}://{config("BASE_URL")}/verifyemail?token={token}'
 
             # ایجاد کاربر
@@ -43,28 +43,85 @@ class SignUp(APIView):
             from django.template import Template, Context
             user_name = user.FullName
 
-            subject = 'Verify Your Shahrsanj Account'
+            # Email subject
+            subject = 'حساب شهرسنج خود را تایید کنید'
 
-            email_body_template = Template("""
+            # HTML email body template
+            html_email_body_template = Template("""
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تایید حساب کاربری شهرسنج</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap" rel="stylesheet">
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Vazirmatn', Arial, sans-serif; background-color: #f4f4f4;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; margin: 20px auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <tr>
+            <td style="padding: 40px 30px; text-align: right;">
+                <h1 style="color: #333333; font-size: 24px; margin: 0 0 20px;">!به شهرسنج خوش آمدید</h1>
+                <p style="color: #555555; font-size: 16px; line-height: 1.5; margin: 0 0 20px;">
+                    ،{{ user_name }} عزیز
+                </p>
+                <p style="color: #555555; font-size: 16px; line-height: 1.5; margin: 0 0 20px;">
+                    از ثبت‌نام شما در شهرسنج متشکریم! برای تکمیل ثبت‌نام، لطفاً با کلیک بر روی دکمه زیر آدرس ایمیل خود را تایید کنید:
+                </p>
+                <div style="text-align: center;">
+                    <a href="{{ verification_code }}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">تایید ایمیل</a>
+                </div>
+                <p style="color: #555555; font-size: 14px; line-height: 1.5; margin: 20px 0 0;">
+                    .این لینک تا ۲۴ ساعت معتبر است. در صورت عدم تایید ایمیل در این مدت، لازم است مجدداً ثبت‌نام کنید
+                </p>
+                <p style="color: #555555; font-size: 14px; line-height: 1.5; margin: 20px 0 0;">
+                    اگر شما در شهرسنج حساب کاربری ایجاد نکرده‌اید، لطفاً این ایمیل را نادیده بگیرید.
+                </p>
+                <p style="color: #555555; font-size: 14px; line-height: 1.5; margin: 20px 0 0;">
+                    در صورت داشتن هرگونه سؤال، می‌توانید با تیم پشتیبانی ما از طریق <a href="mailto:support@shahrsanj.com" style="color: #007bff; text-decoration: none;">support@shahrsanj.com</a> در تماس باشید.
+                </p>
+                <p style="color: #555555; font-size: 14px; line-height: 1.5; margin: 10px 0 0;">
+                    ،با احترام<br>تیم شهرسنج
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+            """)
+
+            # Plain text email body template (fallback)
+            plain_email_body_template = Template("""
 Dear {{ user_name }},
 
-Click on this link to complete your sign-up:
+Thank you for signing up for a Shahrsanj account! To complete your registration, please verify your email address by clicking the link below:
 
 {{ verification_code }}
 
-This link will expire in 24 hours.
+This link will expire in 24 hours. If you do not verify your email within this time, you will need to sign up again.
+
+If you did not create an account with Shahrsanj, please ignore this email.
+
+If you have any questions, feel free to contact our support team at support@shahrsanj.com.
+
+Best regards,
 
 The Shahrsanj Team
-""")
+            """)
+
+            # Context data
             context = Context({
                 'user_name': user_name,
-                'verification_code': frontend_url,  # ارسال لینک جدید فرانت‌اند
+                'verification_code': frontend_url,
             })
 
-            email_body = email_body_template.render(context)
+            # Render both HTML and plain text email bodies
+            html_email_body = html_email_body_template.render(context)
+            plain_email_body = plain_email_body_template.render(context)
 
+            # Email data for sending
             data = {
-                'email_body': email_body,
+                'email_body': plain_email_body,  # Plain text body
+                'html_email_body': html_email_body,  # HTML body
                 'to_email': email,
                 'email_subject': subject
             }
@@ -209,16 +266,47 @@ class RequestPasswordReset(APIView):
 
             # Generate the frontend URL with uidb64 and token
             absurl = f'{config("BASE_HTTP")}://{config("BASE_URL")}/auth/password-reset/{ui64}/{token}/'
-            #
+
             from django.template import Template, Context
-            user_name = user.FullName  # Replace with actual user name retrieval logic
-            reset_link = absurl  # Replace with actual token generation logic
+            user_name = user.FullName
 
             # Email subject
-            subject = 'Reset Your Shahrsanj Password'
+            subject = 'رمز عبور حساب شهرسنج خود را بازنشانی کنید'
 
-            # Email body template as a string
-            email_body_template = Template("""
+            # HTML email body template
+            html_email_body_template = Template("""
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازنشانی رمز عبور شهرسنج</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Vazirmatn', Arial, sans-serif; background-color: #f4f4f4;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; margin: 20px auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <tr>
+            <td style="padding: 40px 30px; text-align: right;">
+                <h1 style="color: #333333; font-size: 24px; margin: 0 0 20px;">بازنشانی رمز عبور شهرسنج</h1>
+                <p style="color: #555555; font-size: 16px; line-height: 1.8; margin: 0 0 20px;">،{{ user_name }} عزیز</p>
+                <p style="color: #555555; font-size: 16px; line-height: 1.8; margin: 0 0 20px;">.درخواستی برای بازنشانی رمز عبور حساب کاربری شما در شهرسنج دریافت کردیم. اگر شما این درخواست را ارسال نکرده‌اید، لطفاً این ایمیل را نادیده بگیرید</p>
+                <p style="color: #555555; font-size: 16px; line-height: 1.8; margin: 0 0 20px;">:برای بازنشانی رمز عبور خود، لطفاً روی دکمه زیر کلیک کنید</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{{ reset_link }}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">بازنشانی رمز عبور</a>
+                </div>
+                <p style="color: #555555; font-size: 14px; line-height: 1.8; margin: 20px 0 0;">.این لینک به دلایل امنیتی تا ۲۴ ساعت معتبر است. اگر در این مدت رمز عبور خود را بازنشانی نکنید، باید درخواست جدیدی ارسال کنید</p>
+                <p style="color: #555555; font-size: 14px; line-height: 1.8; margin: 20px 0 0;">در صورت داشتن هرگونه سؤال یا نیاز به راهنمایی بیشتر، لطفاً با تیم پشتیبانی ما از طریق <a href="mailto:support@shahrsanj.com" style="color: #007bff; text-decoration: none;">support@shahrsanj.com</a> .تماس بگیرید</p>
+                <p style="color: #555555; font-size: 14px; line-height: 1.8; margin: 20px 0 0;">!با تشکر از اینکه از شهرسنج استفاده می‌کنید</p>
+                <p style="color: #555555; font-size: 14px; line-height: 1.8; margin: 10px 0 0;">،با احترام<br>تیم شهرسنج</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+            """)
+
+            # Plain text email body template (fallback)
+            plain_email_body_template = Template("""
 Dear {{ user_name }},
 
 We received a request to reset your password for your Shahrsanj account. If you did not make this request, please ignore this email.
@@ -236,22 +324,24 @@ Thank you for using Shahrsanj!
 Best regards,
 
 The Shahrsanj Team
-             """)
+            """)
 
             # Context data
             context = Context({
                 'user_name': user_name,
-                'reset_link': reset_link,
+                'reset_link': absurl,
             })
 
-            # Render the email body with the context
-            email_body = email_body_template.render(context)
+            # Render both HTML and plain text email bodies
+            html_email_body = html_email_body_template.render(context)
+            plain_email_body = plain_email_body_template.render(context)
 
-            #
+            # Email data for sending
             data = {
-                'email_body': email_body,
+                'email_body': plain_email_body,  # Plain text body
+                'html_email_body': html_email_body,  # HTML body
                 'to_email': email,
-                'email_subject': 'Reset your password'
+                'email_subject': subject
             }
             Util.send_email(data)
             return Response({'success': 'We have sent you a link to reset your password'})
