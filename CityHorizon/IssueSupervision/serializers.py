@@ -17,6 +17,7 @@ class CityProblemSerializer(serializers.Serializer):
     ProvinceName = serializers.CharField(source='City.Province.Name')
     ReporterID = serializers.IntegerField(source='Reporter.id')
     ReporterName = serializers.CharField(source='Reporter.FullName')
+    ReporterPicture = serializers.ImageField(source='Reporter.Picture')
     Longitude = serializers.FloatField()
     Latitude = serializers.FloatField()
     FullAdress = serializers.CharField()
