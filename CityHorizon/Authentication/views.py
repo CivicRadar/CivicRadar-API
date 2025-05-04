@@ -257,8 +257,7 @@ class Profile(APIView):
 class RequestPasswordReset(APIView):
     def post(self, request):
         email = request.data['Email']
-        Typeof = request.data['Type']
-        if User.objects.filter(Email=email, Type=Typeof).exists():
+        if User.objects.filter(Email=email).exists():
             user = User.objects.get(Email=email)
             ui64 = urlsafe_base64_encode(smart_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
