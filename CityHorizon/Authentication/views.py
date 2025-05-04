@@ -137,11 +137,10 @@ class Login(APIView):
         try:
             email = request.data['Email']
             password = request.data['Password']
-            typeof = request.data['Type']
         except KeyError:
             return HttpResponseBadRequest("needs Email, Password and Type fields in request data")
 
-        user = User.objects.filter(Email=email, Type=typeof).first()
+        user = User.objects.filter(Email=email).first()
 
         if user is not None and user.check_password(password):
             if user.Verified==False and user.Type=='Citizen':
@@ -160,7 +159,7 @@ class Login(APIView):
             if user.Theme is not None:
                 response.set_cookie(key='theme', value=user.Theme)
 
-            response.data = {'jwt': token}
+            response.data = {'jwt': token, 'usertype': user.Type}
             return response
         raise AuthenticationFailed('your email or password is incorrect')
 
