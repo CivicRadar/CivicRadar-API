@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'Authentication',
     'MayorRegistry',
-    'IssueSupervision'
+    'IssueSupervision',
+    'Statistics'
 ]
 
 MIDDLEWARE = [

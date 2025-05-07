@@ -25,4 +25,5 @@ urlpatterns = [
     path('mayor-registry/', include('MayorRegistry.urls')),
     path('supervise/', include('IssueSupervision.urls')),
     path('communicate/', include('Communication.urls')),
+    path('stats/', include('Statistics.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
