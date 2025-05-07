@@ -166,7 +166,13 @@ class Login(APIView):
 class Logout(APIView):
     def get(self, request):
         response = Response()
-        response.delete_cookie('jwt')
+        response.delete_cookie(
+    key='jwt',
+    path='/',
+    domain=None,
+    samesite='None',
+)
+
         response.data = {
             'message': 'You have been logged out.'
         }
