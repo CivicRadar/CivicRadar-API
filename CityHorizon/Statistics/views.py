@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from .serializers import MayorReportSerializer
-from .utils import generate_and_save_charts
 from Authentication.models import User
 import jwt
 from django.conf import settings
