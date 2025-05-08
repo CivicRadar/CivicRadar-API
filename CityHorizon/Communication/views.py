@@ -147,7 +147,7 @@ class Comments(APIView):
         if cprobe is None:
             raise AuthenticationFailed("City problem not found!")
         comments = Comment.objects.filter(CityProblem=cprobe).all()
-        serialzier = CommentSerializer(comments, many=True)
+        serialzier = CommentSerializer(comments, many=True, context={'userid':user.id})
         return Response(serialzier.data)
 
     def post(self, request):
@@ -175,7 +175,7 @@ class Comments(APIView):
                           ReplyID=request.data['ReplyID'])
         comment.full_clean()
         comment.save()
-        serializer = CommentSerializer(comment)
+        serializer = CommentSerializer(comment, context={'userid':user.id})
         return Response(serializer.data)
 
 class CommentReactions(APIView):

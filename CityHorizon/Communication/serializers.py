@@ -140,6 +140,15 @@ class CommentOnlySerializer(serializers.Serializer):
     SenderPicture = serializers.ImageField(source='Sender.Picture')
     SenderType = serializers.CharField(source='Sender.Type')
     Content = serializers.CharField()
+    HasOwnership = serializers.SerializerMethodField()
+
+    def get_HasOwnership(self, obj):
+        if 'userid' in self.context:
+            user = User.objects.filter(id=self.context['userid']).first()
+            if user is None:
+                return None
+            return user.id == obj.Sender.id
+        return None
 
 class CommentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -150,16 +159,20 @@ class CommentSerializer(serializers.Serializer):
     Reply = serializers.SerializerMethodField()
     Likes = serializers.SerializerMethodField()
     DisLikes = serializers.SerializerMethodField()
+    HasOwnership = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ['id', 'SenderName', 'SenderPicture', 'Content', 'Reply', 'Likes', 'DisLikes']
+        fields = ['id', 'SenderName', 'SenderPicture', 'Content', 'Reply', 'Likes', 'DisLikes', 'HasOwnership']
 
     def get_Reply(self, obj):
         if obj.IsAReply:
             comment = Comment.objects.filter(CityProblem=obj.CityProblem,id=obj.ReplyID).first()
             if comment is None:
                 return None
-            return CommentOnlySerializer(comment).data
+            user = User.objects.filter(id=self.context['userid']).first()
+            if not user:
+                return CommentOnlySerializer(comment).data
+            return CommentOnlySerializer(comment, context={'userid':user.id}).data
         return None
 
     def get_Likes(self, obj):
@@ -167,6 +180,14 @@ class CommentSerializer(serializers.Serializer):
 
     def get_DisLikes(self, obj):
         return CommentReaction.objects.filter(Comment=obj, Like=False).count()
+
+    def get_HasOwnership(self, obj):
+        if 'userid' in self.context:
+            user = User.objects.filter(id=self.context['userid']).first()
+            if user is None:
+                return None
+            return user.id == obj.Sender.id
+        return None
 
 class CommentReactionSerializer(serializers.ModelSerializer):
     class Meta:
