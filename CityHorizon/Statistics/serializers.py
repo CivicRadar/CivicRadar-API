@@ -1,3 +1,5 @@
+from django.db.models import Avg, F, FloatField
+from django.db.models.expressions import ExpressionWrapper
 import datetime
 from datetime import timedelta
 from rest_framework import serializers
@@ -96,14 +98,60 @@ class MayorReportSerializer(serializers.ModelSerializer):
         mydict = dict()
         now = datetime.datetime.now()
         current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        counter_current = Notification.objects.filter(Sender=obj, Date__gte=current_month).count()
+        counter_current = Notification.objects.filter(Sender=obj, Date__gte=current_month, UpdatedTo='IssueResolved').count()
         mydict.update({current_month.strftime("%B %Y"): counter_current})
-        for i in range(15):
+        for i in range(5):
             last_month = (current_month - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            counter_last = Notification.objects.filter(Sender=obj, Date__gte=last_month, Date__lt=current_month).count()
+            counter_last = Notification.objects.filter(Sender=obj, Date__gte=last_month, Date__lt=current_month, UpdatedTo='IssueResolved').count()
             mydict.update({last_month.strftime("%B %Y"): counter_last})
             current_month=last_month
         return mydict
 
     def get_transition_time_bar_chart(self, obj):
-        pass
+        mydict = dict()
+
+        # Helper function to calculate average days for a given type and status
+        def calculate_avg_days(notification_type, updated_to, obj):
+            queryset = (
+                Notification.objects.filter(
+                    Sender=obj,
+                    UpdatedTo=updated_to,
+                    CityProblem__City__in=MayorCities.objects.filter(User=obj).values('City'),
+                    CityProblem__Type=notification_type
+                )
+                .annotate(
+                    time_diff=(F('CityProblem__DateTime') - F('Date'))
+                )
+                .values('time_diff')
+            )
+
+            # Fetch all time_diff values and calculate average in Python
+            time_diffs = [item['time_diff'].total_seconds() / 86400.0 for item in queryset if
+                          item['time_diff'] is not None]
+            return sum(time_diffs) / len(time_diffs) if time_diffs else 0
+
+        # Calculate averages for Lighting
+        mydict.update({
+            "Lighting_UnderConsideration": calculate_avg_days('Lighting', 'UnderConsideration', obj),
+            "Lighting_IssueResolved": calculate_avg_days('Lighting', 'IssueResolved', obj)
+        })
+
+        # Calculate averages for Garbage
+        mydict.update({
+            "Garbage_UnderConsideration": calculate_avg_days('Garbage', 'UnderConsideration', obj),
+            "Garbage_IssueResolved": calculate_avg_days('Garbage', 'IssueResolved', obj)
+        })
+
+        # Calculate averages for Other
+        mydict.update({
+            "Other_UnderConsideration": calculate_avg_days('Other', 'UnderConsideration', obj),
+            "Other_IssueResolved": calculate_avg_days('Other', 'IssueResolved', obj)
+        })
+
+        # Calculate averages for Street
+        mydict.update({
+            "Street_UnderConsideration": calculate_avg_days('Street', 'UnderConsideration', obj),
+            "Street_IssueResolved": calculate_avg_days('Street', 'IssueResolved', obj)
+        })
+
+        return mydict
