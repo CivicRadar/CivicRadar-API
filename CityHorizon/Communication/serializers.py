@@ -138,12 +138,14 @@ class CommentOnlySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     SenderName = serializers.CharField(source='Sender.FullName')
     SenderPicture = serializers.ImageField(source='Sender.Picture')
+    SenderType = serializers.CharField(source='Sender.Type')
     Content = serializers.CharField()
 
 class CommentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     SenderName = serializers.CharField(source='Sender.FullName')
     SenderPicture = serializers.ImageField(source='Sender.Picture')
+    SenderType = serializers.CharField(source='Sender.Type')
     Content = serializers.CharField()
     Reply = serializers.SerializerMethodField()
     Likes = serializers.SerializerMethodField()
