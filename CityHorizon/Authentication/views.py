@@ -163,6 +163,49 @@ class Login(APIView):
             return response
         raise AuthenticationFailed('your email or password is incorrect')
 
+class Notifs(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        return Response({'NotificationDeactivationTime':user.NotificationDeactivationTime})
+
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id']).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        myvar = request.data['Activate']
+        if myvar not in (True, False):
+            raise AuthenticationFailed("Activate key must have True or False value!")
+        if myvar:
+            user.NotificationDeactivationTime=None
+            user.save()
+        else:
+            if user.NotificationDeactivationTime is None:
+                user.NotificationDeactivationTime = datetime.datetime.utcnow()
+                user.save()
+        return Response({'NotificationDeactivationTime':user.NotificationDeactivationTime})
+
 class Logout(APIView):
     def get(self, request):
         response = Response()

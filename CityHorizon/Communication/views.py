@@ -24,9 +24,15 @@ class Notifications(APIView):
         user = User.objects.filter(id=payload['id'], Type='Citizen').first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        notifs = Notification.objects.filter(Receiver=user).all()
-        serializer = NotoficationSerializer(notifs, many=True)
-        return Response(serializer.data)
+
+        if user.NotificationDeactivationTime is None:
+            notifs = Notification.objects.filter(Receiver=user).all()
+            serializer = NotoficationSerializer(notifs, many=True)
+            return Response(serializer.data)
+        else:
+            notifs = Notification.objects.filter(Receiver=user, Date__lt=user.NotificationDeactivationTime).all()
+            serializer = NotoficationSerializer(notifs, many=True)
+            return Response(serializer.data)
     def put(self, request):
         token = request.COOKIES.get('jwt')
 
