@@ -119,10 +119,10 @@ class AllCitizenReport(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Expired token!")
 
-        user = User.objects.filter(id=payload['id'], Type='Citizen').first()
+        user = User.objects.filter(id=payload['id']).first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        problems = CityProblem.objects.filter(Reporter=user).all()
+        problems = CityProblem.objects.all()
         serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
 
