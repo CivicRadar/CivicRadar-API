@@ -120,7 +120,7 @@ class MayorReportSerializer(serializers.ModelSerializer):
                     CityProblem__Type=notification_type
                 )
                 .annotate(
-                    time_diff=(F('CityProblem__DateTime') - F('Date'))
+                    time_diff=(F('Date') - F('CityProblem__DateTime'))
                 )
                 .values('time_diff')
             )
