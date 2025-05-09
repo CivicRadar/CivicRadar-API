@@ -155,3 +155,19 @@ class MayorReportSerializer(serializers.ModelSerializer):
         })
 
         return mydict
+
+class CounterSerializer(serializers.Serializer):
+    UserCount = serializers.SerializerMethodField()
+    MayorCount = serializers.SerializerMethodField()
+    DailyReportCount = serializers.SerializerMethodField()
+
+    def get_UserCount(self, obj):
+        return User.objects.filter(Type='Citizen', Verified=True).count()
+
+    def get_MayorCount(self, obj):
+        return User.objects.filter(Type='Mayor').count()
+
+    def get_DailyReportCount(self, obj):
+        now = datetime.datetime.now()
+        doob = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        return CityProblem.objects.filter(DateTime__gte=doob).count()
