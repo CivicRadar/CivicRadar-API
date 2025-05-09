@@ -156,7 +156,7 @@ class CommentSerializer(serializers.Serializer):
     SenderPicture = serializers.ImageField(source='Sender.Picture')
     SenderType = serializers.CharField(source='Sender.Type')
     Content = serializers.CharField()
-    Reply = serializers.SerializerMethodField()
+    Replies = serializers.SerializerMethodField()
     Likes = serializers.SerializerMethodField()
     DisLikes = serializers.SerializerMethodField()
     HasOwnership = serializers.SerializerMethodField()
@@ -164,16 +164,21 @@ class CommentSerializer(serializers.Serializer):
     class Meta:
         fields = ['id', 'SenderName', 'SenderPicture', 'Content', 'Reply', 'Likes', 'DisLikes', 'HasOwnership']
 
-    def get_Reply(self, obj):
-        if obj.IsAReply:
-            comment = Comment.objects.filter(CityProblem=obj.CityProblem,id=obj.ReplyID).first()
-            if comment is None:
-                return None
-            user = User.objects.filter(id=self.context['userid']).first()
-            if not user:
-                return CommentOnlySerializer(comment).data
-            return CommentOnlySerializer(comment, context={'userid':user.id}).data
-        return None
+    def get_Replies(self, obj):
+        # if obj.IsAReply:
+        #     comment = Comment.objects.filter(CityProblem=obj.CityProblem,id=obj.ReplyID).first()
+        #     if comment is None:
+        #         return None
+        #     user = User.objects.filter(id=self.context['userid']).first()
+        #     if not user:
+        #         return CommentOnlySerializer(comment).data
+        #     return CommentOnlySerializer(comment, context={'userid':user.id}).data
+        # return None
+        comments = Comment.objects.filter(CityProblem=obj.CityProblem, ReplyID=obj.id).all()
+        user = User.objects.filter(id=self.context['userid']).first()
+        if not user:
+            return CommentOnlySerializer(comments, many=True).data
+        return CommentOnlySerializer(comments, many=True, context={'userid': user.id}).data
 
     def get_Likes(self, obj):
         return CommentReaction.objects.filter(Comment=obj, Like=True).count()
