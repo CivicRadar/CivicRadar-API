@@ -152,7 +152,7 @@ class Comments(APIView):
         cprobe = CityProblem.objects.filter(id=myvar).first()
         if cprobe is None:
             raise AuthenticationFailed("City problem not found!")
-        comments = Comment.objects.filter(CityProblem=cprobe).all()
+        comments = Comment.objects.filter(CityProblem=cprobe, IsAReply=False).all()
         serialzier = CommentSerializer(comments, many=True, context={'userid':user.id})
         return Response(serialzier.data)
 
@@ -181,8 +181,7 @@ class Comments(APIView):
                           ReplyID=request.data['ReplyID'])
         comment.full_clean()
         comment.save()
-        serializer = CommentSerializer(comment, context={'userid':user.id})
-        return Response(serializer.data)
+        return Response({"Success":"You posted a message!"})
 
 class CommentReactions(APIView):
     def get(self, request):
