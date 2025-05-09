@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
-from .serializers import MayorReportSerializer
+from .serializers import MayorReportSerializer, CounterSerializer
 from Authentication.models import User
 import jwt
 from django.conf import settings
@@ -54,3 +54,23 @@ class MayorReportView(APIView):
         # Serialize the saved instance for response
         response_serializer = MayorReportSerializer(user)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+class Counter(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        mylist = ['Mayor', 'Admin']
+        user = User.objects.filter(id=payload['id'], Type__in=mylist).first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        serializer = CounterSerializer(user)
+        return Response(serializer.data)
