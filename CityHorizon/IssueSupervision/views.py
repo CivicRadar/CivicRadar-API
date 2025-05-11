@@ -100,9 +100,19 @@ class CitizenReportCitizen(APIView):
         user = User.objects.filter(id=payload['id'], Type='Citizen').first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        reports = ReportCitizen.objects.filter(Reporter=user).all()
-        serializer = ReportCitizenSerializer(reports, many=True)
-        return Response(serializer.data)
+
+        CityProblemID = request.query_params.get('CityProblemID')
+        if not CityProblemID:
+            problems = CityProblem.objects.filter(Reporter=user).all()
+            serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
+            return Response(serializer.data)
+        cprobe = CityProblem.objects.filter(id=CityProblemID).first()
+        if not cprobe:
+            raise AuthenticationFailed("Problem not found!")
+        rp = ReportCitizen.objects.filter(Reporter=user, Reported=cprobe).first()
+        if not rp:
+            return Response({"Answer": "you haven't reported this problem"})
+        return Response({"Answer": "you have reported this problem"})
 
 class AllCitizenReport(APIView):
     def get(self, request):
