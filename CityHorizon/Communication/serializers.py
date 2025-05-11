@@ -175,6 +175,8 @@ class CommentSerializer(serializers.Serializer):
         #     return CommentOnlySerializer(comment, context={'userid':user.id}).data
         # return None
         comments = Comment.objects.filter(CityProblem=obj.CityProblem, ReplyID=obj.id).all()
+        if 'userid' not in self.context:
+            return CommentOnlySerializer(comments, many=True).data
         user = User.objects.filter(id=self.context['userid']).first()
         if not user:
             return CommentOnlySerializer(comments, many=True).data
