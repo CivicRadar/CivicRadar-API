@@ -134,7 +134,15 @@ class Comments(APIView):
         token = request.COOKIES.get('jwt')
 
         if not token:
-            raise AuthenticationFailed("Unauthenticated!")
+            myvar = request.query_params.get('CityProblemID')
+            if myvar is None:
+                raise AuthenticationFailed("variable name is wrong or value is null")
+            cprobe = CityProblem.objects.filter(id=myvar).first()
+            if cprobe is None:
+                raise AuthenticationFailed("City problem not found!")
+            comments = Comment.objects.filter(CityProblem=cprobe, IsAReply=False).all()
+            serialzier = CommentSerializer(comments, many=True)
+            return Response(serialzier.data)
 
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
@@ -144,8 +152,6 @@ class Comments(APIView):
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        if user.Type == 'Admin':
-            raise AuthenticationFailed("You can't comment as an admin!")
         myvar = request.query_params.get('CityProblemID')
         if myvar is None:
             raise AuthenticationFailed("variable name is wrong or value is null")
