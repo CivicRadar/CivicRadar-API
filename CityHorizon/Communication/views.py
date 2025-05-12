@@ -194,26 +194,26 @@ class CommentReactions(APIView):
         token = request.COOKIES.get('jwt')
 
         if not token:
-            raise AuthenticationFailed("Unauthenticated!")
+            return Response({"Like": None})
 
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Expired token!")
+            return Response({"Like": None})
 
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
-            raise AuthenticationFailed("User not found!")
-        if user.Type == 'Admin':
-            raise AuthenticationFailed("You can't comment as an admin!")
+            return Response({"Like": None})
 
         comment = Comment.objects.filter(id=request.query_params['CommentID']).first()
         if comment is None:
-            raise AuthenticationFailed("City problem not found!")
+            return Response({"Like": None})
+
         react = CommentReaction.objects.filter(Reactor=user, Comment=comment).first()
         if react is None:
-            return Response({"Like":None})
-        return Response({"Like":react.Like})
+            return Response({"Like": None})
+
+        return Response({"Like": react.Like})
 
     def post(self, request):
         token = request.COOKIES.get('jwt')

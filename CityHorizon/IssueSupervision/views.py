@@ -7,8 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
                                    Notification, MayorPriority, Organization, Provinces, ReportCitizen)
-from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer, \
-    MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer, ProvinceProblemCountSerializer
+from .serializers import (CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer,
+                          MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer, ProvinceProblemCountSerializer,
+                          HandleCRCSerializer)
 import jwt, datetime
 
 
@@ -184,7 +185,7 @@ class HandleCRC(APIView):
 
         cprobeids = ReportCitizen.objects.values_list('Reported__id', flat=True)
         cprobes = CityProblem.objects.filter(id__in=cprobeids).all()
-        serializer = CityProblemSerializer(cprobes, many=True)
+        serializer = HandleCRCSerializer(cprobes, many=True)
         return Response(serializer.data)
 
 class PublicReport(APIView):
