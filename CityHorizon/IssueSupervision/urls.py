@@ -2,7 +2,7 @@ from django.urls import path
 from .views import CitizenReportProblem, CitizenReportCitizen, AllCitizenReport, MayorCityReports, \
                    MayorNotes, MayorDetermineCityProblemSituation, MayorPrioritize, MayorDelegate, MayorDedicatedReportPage, \
                    PublicReport, ReportCount, CityReportCount, CitiesReportCount, ProvincesReportCount, ProvinceReportCount, \
-                   ComplexReportCount
+                   ComplexReportCount, HandleCRC
 
 urlpatterns = [
     path('citizen-report-problem/', CitizenReportProblem.as_view()),
@@ -21,4 +21,5 @@ urlpatterns = [
     path('provinces-report-count/', ProvincesReportCount.as_view()),
     path('province-report-count/', ProvinceReportCount.as_view()),
     path('complex-report-count/', ComplexReportCount.as_view()),
+    path('handle-crc/', HandleCRC.as_view()),
 ]

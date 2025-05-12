@@ -6,7 +6,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
-                                   Notification, MayorPriority, Organization, Provinces)
+                                   Notification, MayorPriority, Organization, Provinces, ReportCitizen)
 from .serializers import CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer, \
     MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer, ProvinceProblemCountSerializer
 import jwt, datetime
@@ -134,6 +134,57 @@ class AllCitizenReport(APIView):
             raise AuthenticationFailed("User not found!")
         problems = CityProblem.objects.all()
         serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
+        return Response(serializer.data)
+
+class HandleCRC(APIView):
+    def delete(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            problems = CityProblem.objects.all()
+            serializer = CityProblemSerializer(problems, many=True)
+            return Response(serializer.data)
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type="Admin").first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        cprobeid = ReportCitizen.objects.filter(Reported__id=request.data['CityProblemID']).first()
+        if not cprobeid:
+            raise AuthenticationFailed("Problem ID not found!")
+
+        cprobe = CityProblem.objects.filter(id=cprobeid.Reported.id).first()
+        if not cprobe:
+            raise AuthenticationFailed("Problem not found!")
+
+        cprobe.delete()
+        return Response({"Answer": "Deleted Successfully!"})
+
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            problems = CityProblem.objects.all()
+            serializer = CityProblemSerializer(problems, many=True)
+            return Response(serializer.data)
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type="Admin").first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+
+        cprobeids = ReportCitizen.objects.values_list('Reported__id', flat=True)
+        cprobes = CityProblem.objects.filter(id__in=cprobeids).all()
+        serializer = CityProblemSerializer(cprobes, many=True)
         return Response(serializer.data)
 
 class PublicReport(APIView):
