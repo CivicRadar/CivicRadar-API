@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.db.models import Count, Max
 from rest_framework import serializers
 from Authentication.models import (User, Provinces, Cities, CityProblemProsecute, CityProblem, MayorCities,
-                                   MayorNote, CityProblemReaction, MayorPriority, Notification)
+                                   MayorNote, CityProblemReaction, MayorPriority, Notification, ReportCitizen)
 
 
 class CityProblemSerializer(serializers.Serializer):
@@ -39,6 +39,37 @@ class CityProblemSerializer(serializers.Serializer):
                 return None
             return myobject.Like
         return None
+
+class HandleCRCSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    Information = serializers.CharField()
+    Type = serializers.CharField()
+    Picture = serializers.ImageField()
+    Video = serializers.FileField()
+    DateTime = serializers.DateTimeField()
+    CityID = serializers.IntegerField(source='City.id')
+    CityName = serializers.CharField(source='City.Name')
+    ProvinceName = serializers.CharField(source='City.Province.Name')
+    ReporterID = serializers.IntegerField(source='Reporter.id')
+    ReporterName = serializers.CharField(source='Reporter.FullName')
+    ReporterPicture = serializers.ImageField(source='Reporter.Picture')
+    Longitude = serializers.FloatField()
+    Latitude = serializers.FloatField()
+    FullAdress = serializers.CharField()
+    Status = serializers.CharField()
+    Likes = serializers.SerializerMethodField()
+    Dislikes = serializers.SerializerMethodField()
+    Reports = serializers.SerializerMethodField()
+
+    def get_Likes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=True).count()
+
+    def get_Dislikes(self, obj):
+        return CityProblemReaction.objects.filter(CityProblem=obj, Like=False).count()
+
+    def get_Reports(self, obj):
+        repos = ReportCitizen.objects.filter(Reported__id=obj.id).values_list('Report', flat=True)
+        return repos
 
 class ReportCitizenSerializer(serializers.Serializer):
     id = serializers.IntegerField()
