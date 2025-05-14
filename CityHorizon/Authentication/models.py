@@ -86,11 +86,12 @@ class MayorNote(models.Model):
 class Notification(models.Model):
     update_type  = [
         ('UnderConsideration', 'UnderConsideration'),
-        ('IssueResolved', 'IssueResolved')
+        ('IssueResolved', 'IssueResolved'),
+        ('Deleted', 'Deleted'),
     ]
     Message = models.CharField(max_length=1000)
     Receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Receiver')
-    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.SET_NULL, null=True, blank=True)
     UpdatedTo = models.CharField(max_length=30, choices=update_type)
     Date = models.DateTimeField(auto_now_add=True)
     Seen = models.BooleanField(default=False)
