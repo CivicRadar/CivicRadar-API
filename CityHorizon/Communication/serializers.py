@@ -10,11 +10,16 @@ from calendar import monthrange
 class NotoficationSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     Message = serializers.CharField()
-    CityProblemID = serializers.IntegerField(source='CityProblem.id')
+    CityProblemID = serializers.SerializerMethodField()
     Date = serializers.DateTimeField()
     Seen = serializers.BooleanField()
     SenderID = serializers.CharField(source='Sender.id')
     SenderFullName = serializers.CharField(source='Sender.FullName')
+
+    def get_CityProblemID(self, obj):
+        if obj.CityProblem:
+            return obj.CityProblem.id
+        return None
 
 class CityProblemReactionSerializer(serializers.ModelSerializer):
     class Meta:

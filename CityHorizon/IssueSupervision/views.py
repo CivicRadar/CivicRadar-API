@@ -163,6 +163,11 @@ class HandleCRC(APIView):
         if not cprobe:
             raise AuthenticationFailed("Problem not found!")
 
+        notif = Notification(Message=f'شهروند گرامی، گزارش شهری شما در مکان {cprobe.FullAdress} توسط سایر شهروندان به عنوان تخلف ثبت شده است. پس از بررسی‌های لازم، این گزارش توسط ادمین سیستم شهرسنج حذف گردید.',
+                             Receiver=cprobe.Reporter,
+                             CityProblem=cprobe,
+                             UpdatedTo='Deleted',
+                             Sender=user).save()
         cprobe.delete()
         return Response({"Answer": "Deleted Successfully!"})
 
