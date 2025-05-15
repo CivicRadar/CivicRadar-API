@@ -70,7 +70,7 @@ class CityProblem(models.Model):
 class ReportCitizen(models.Model):
     Reporter = models.ForeignKey(User, on_delete=models.CASCADE)
     Reported = models.ForeignKey(CityProblem, on_delete=models.CASCADE)
-    Report = models.CharField(max_length=100)
+    Report = models.CharField(max_length=1500)
     class Meta:
         unique_together = ('Reporter', 'Reported')
 
