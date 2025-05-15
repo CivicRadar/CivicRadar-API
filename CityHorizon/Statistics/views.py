@@ -67,8 +67,7 @@ class Counter(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Expired token!")
 
-        mylist = ['Mayor', 'Admin']
-        user = User.objects.filter(id=payload['id'], Type__in=mylist).first()
+        user = User.objects.filter(id=payload['id']).first()
         if user is None:
             raise AuthenticationFailed("User not found!")
 
