@@ -176,8 +176,6 @@ class Comments(APIView):
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        if user.Type == 'Admin':
-            raise AuthenticationFailed("You can't comment as an admin!")
         cprobe = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
         if cprobe is None:
             raise AuthenticationFailed("City problem not found!")
@@ -229,8 +227,6 @@ class CommentReactions(APIView):
         user = User.objects.filter(id=payload['id']).first()
         if user is None:
             raise AuthenticationFailed("User not found!")
-        if user.Type == 'Admin':
-            raise AuthenticationFailed("You can't comment as an admin!")
 
         comment = Comment.objects.filter(id=request.data['CommentID']).first()
         if comment is None:
