@@ -176,6 +176,7 @@ class MayorCompleteCityProblemSerializer(serializers.Serializer):
     VerificationDate = serializers.SerializerMethodField()
     ConsideredByMayor = serializers.SerializerMethodField()
     ResolvedByMayor = serializers.SerializerMethodField()
+    Violations = serializers.SerializerMethodField()
 
     def get_Likes(self, obj):
         return CityProblemReaction.objects.filter(CityProblem=obj, Like=True).count()
@@ -220,6 +221,9 @@ class MayorCompleteCityProblemSerializer(serializers.Serializer):
         if resnotif is None:
             return None
         return NotifMayorSerializer(resnotif).data
+
+    def get_Violations(self, obj):
+        return Notification.objects.filter(Receiver__id=obj.Reporter.id, UpdatedTo='Deleted').count()
 
 class OrganizationSerializer(serializers.Serializer):
     id = serializers.IntegerField()
