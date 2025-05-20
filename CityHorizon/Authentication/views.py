@@ -159,7 +159,7 @@ class Login(APIView):
                     ).order_by('-like_count').first()
                     if most_liked_problem is not None:
                         # Create a MayorNotification
-                        mymessage = f"جناب شهردار، یک مشکل مهم در شهر {most_liked_problem.City.Name} گزارش شده است. لطفا این موضوغ را جهت بررسی و اقدام لازم در اولویت قرار دهید."
+                        mymessage = f"جناب شهردار، یک مشکل مهم در شهر {most_liked_problem.City.Name} گزارش شده است. لطفا این موضوع را جهت بررسی و اقدام لازم در اولویت قرار دهید."
                         myobj = MayorNotification.objects.create(
                             Message=mymessage,
                             Receiver=user,
