@@ -11,12 +11,13 @@ from django.core.mail import send_mail
 from django.core import signing
 from CityHorizon.settings import EMAIL_HOST_USER
 from decouple import config
+from django.db.models import Count, Q
 from rest_framework import generics
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.views import APIView
 from .serializers import UserSerializer, ResetPasswordRequestSerializer, SetNewPasswordSerializer, ProfileSerializer
 from rest_framework.response import Response
-from .models import User
+from .models import User, MayorNotification, CityProblem, MayorCities
 from django.core import signing
 import jwt, datetime
 
@@ -145,6 +146,29 @@ class Login(APIView):
         if user is not None and user.check_password(password):
             if user.Verified==False and user.Type=='Citizen':
                 raise AuthenticationFailed('Please verify your account via Email.')
+
+            if user.Type == 'Mayor':
+                current = datetime.datetime.now().date()
+                notif = MayorNotification.objects.filter(Receiver=user, OnlyDate=current).first()
+                if notif is None:
+                    mayor_cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+                    most_liked_problem = CityProblem.objects.filter(
+                        City__id__in=mayor_cities
+                    ).annotate(
+                        like_count=Count('cityproblemreaction', filter=Q(cityproblemreaction__Like=True))
+                    ).order_by('-like_count').first()
+                    if most_liked_problem is not None:
+                        # Create a MayorNotification
+                        mymessage = f"جناب شهردار، یک مشکل مهم در شهر {most_liked_problem.City.Name} گزارش شده است. لطفا این موضوغ را جهت بررسی و اقدام لازم در اولویت قرار دهید."
+                        myobj = MayorNotification.objects.create(
+                            Message=mymessage,
+                            Receiver=user,
+                            CityProblem=most_liked_problem,
+                            Sender=most_liked_problem.Reporter,  # Assuming the reporter is the sender
+                            Seen=False
+                        )
+                        myobj.full_clean()
+                        myobj.save()
 
             payload = {
                 'id': user.id,
