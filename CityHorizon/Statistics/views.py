@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from .serializers import MayorReportSerializer, CounterSerializer
-from Authentication.models import User
+from Authentication.models import User, CityProblem
 import jwt
 from django.conf import settings
 from datetime import datetime
@@ -57,19 +57,19 @@ class MayorReportView(APIView):
 
 class Counter(APIView):
     def get(self, request):
-        token = request.COOKIES.get('jwt')
+        now = datetime.now()
+        doob = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        data = {'MayorCount': User.objects.filter(Type='Mayor').count(),
+                'UserCount': User.objects.filter(Type='Citizen', Verified=True).count(),
+                'DailyReportCount': CityProblem.objects.filter(DateTime__gte=doob).count()}
+        # serializer = CounterSerializer(data=data)
+        # serializer.is_valid(raise_exception=True)
+        return Response(data)
 
-        if not token:
-            raise AuthenticationFailed("Unauthenticated!")
-
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Expired token!")
-
-        user = User.objects.filter(id=payload['id']).first()
-        if user is None:
-            raise AuthenticationFailed("User not found!")
-
-        serializer = CounterSerializer(user)
-        return Response(serializer.data)
+class LandingCounter(APIView):
+    def get(self, request):
+        data = {'MayorCount': User.objects.filter(Type='Mayor').count(),
+                'UserCount': User.objects.filter(Type='Citizen', Verified=True).count(),
+                'TotalReportCount': CityProblem.objects.filter().count(),
+                'TotalResolvedReportCount': CityProblem.objects.filter(Status='IssueResolved').count()}
+        return Response(data)
