@@ -193,6 +193,34 @@ class HandleCRC(APIView):
         serializer = HandleCRCSerializer(cprobes, many=True)
         return Response(serializer.data)
 
+    def put(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            problems = CityProblem.objects.all()
+            serializer = CityProblemSerializer(problems, many=True)
+            return Response(serializer.data)
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Expired token!")
+
+        user = User.objects.filter(id=payload['id'], Type="Admin").first()
+        if user is None:
+            raise AuthenticationFailed("User not found!")
+        cprobeid = ReportCitizen.objects.filter(Reported__id=request.data['CityProblemID']).first()
+        if not cprobeid:
+            raise AuthenticationFailed("Problem ID not found!")
+
+        cprobe = CityProblem.objects.filter(id=cprobeid.Reported.id).first()
+        if not cprobe:
+            raise AuthenticationFailed("Problem not found!")
+        rcs = ReportCitizen.objects.filter(Reported__id=cprobe.id).all()
+        for rc in rcs:
+            rc.delete()
+        return Response({"Answer": "Deleted wrong infractions successfully!"})
+
 class PublicReport(APIView):
     def get(self, request):
         problem = CityProblem.objects.filter(id=request.query_params.get('CityProblem_ID')).first()
