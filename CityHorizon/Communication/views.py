@@ -4,7 +4,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (User, Notification, CityProblemReaction, CityProblem,
-                                   Comment, CommentReaction, MayorNotification)
+                                   Comment, CommentReaction, MayorNotification, MayorCities)
+from django.db.models import Count, Q
 from .serializers import (NotoficationSerializer, CityProblemReactionSerializer, PointsSerializer,
                           CommentSerializer, CommentReactionSerializer, MayorNotoficationSerializer)
 import jwt, datetime
@@ -74,6 +75,28 @@ class MayorNotifications(APIView):
         user = User.objects.filter(id=payload['id'], Type='Mayor').first()
         if user is None:
             raise AuthenticationFailed("User not found!")
+
+        current = datetime.datetime.now().date()
+        notif = MayorNotification.objects.filter(Receiver=user, OnlyDate=current).first()
+        if notif is None:
+            mayor_cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
+            most_liked_problem = CityProblem.objects.filter(
+                City__id__in=mayor_cities
+            ).annotate(
+                like_count=Count('cityproblemreaction', filter=Q(cityproblemreaction__Like=True))
+            ).order_by('-like_count').first()
+            if most_liked_problem is not None:
+                # Create a MayorNotification
+                mymessage = f"جناب شهردار، یک مشکل مهم در شهر {most_liked_problem.City.Name} گزارش شده است. لطفا این موضوع را جهت بررسی و اقدام لازم در اولویت قرار دهید."
+                myobj = MayorNotification.objects.create(
+                    Message=mymessage,
+                    Receiver=user,
+                    CityProblem=most_liked_problem,
+                    Sender=most_liked_problem.Reporter,  # Assuming the reporter is the sender
+                    Seen=False
+                )
+                myobj.full_clean()
+                myobj.save()
 
         if user.NotificationDeactivationTime is None:
             notifs = MayorNotification.objects.filter(Receiver=user).all()

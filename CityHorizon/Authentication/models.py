@@ -151,7 +151,7 @@ class CommentReaction(models.Model):
 class MayorNotification(models.Model):
     Message = models.CharField(max_length=1000)
     Receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='MReceiver')
-    CityProblem = models.ForeignKey(CityProblem, on_delete=models.SET_NULL, null=True, blank=True)
+    CityProblem = models.ForeignKey(CityProblem, on_delete=models.CASCADE, null=True, blank=True)
     OnlyDate = models.DateField(auto_now_add=True)
     Date = models.DateTimeField(auto_now_add=True)
     Seen = models.BooleanField(default=False)
