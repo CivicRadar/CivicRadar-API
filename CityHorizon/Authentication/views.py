@@ -147,29 +147,6 @@ class Login(APIView):
             if user.Verified==False and user.Type=='Citizen':
                 raise AuthenticationFailed('Please verify your account via Email.')
 
-            if user.Type == 'Mayor':
-                current = datetime.datetime.now().date()
-                notif = MayorNotification.objects.filter(Receiver=user, OnlyDate=current).first()
-                if notif is None:
-                    mayor_cities = MayorCities.objects.filter(User=user).values_list('City__id', flat=True)
-                    most_liked_problem = CityProblem.objects.filter(
-                        City__id__in=mayor_cities
-                    ).annotate(
-                        like_count=Count('cityproblemreaction', filter=Q(cityproblemreaction__Like=True))
-                    ).order_by('-like_count').first()
-                    if most_liked_problem is not None:
-                        # Create a MayorNotification
-                        mymessage = f"جناب شهردار، یک مشکل مهم در شهر {most_liked_problem.City.Name} گزارش شده است. لطفا این موضوع را جهت بررسی و اقدام لازم در اولویت قرار دهید."
-                        myobj = MayorNotification.objects.create(
-                            Message=mymessage,
-                            Receiver=user,
-                            CityProblem=most_liked_problem,
-                            Sender=most_liked_problem.Reporter,  # Assuming the reporter is the sender
-                            Seen=False
-                        )
-                        myobj.full_clean()
-                        myobj.save()
-
             payload = {
                 'id': user.id,
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=2),
