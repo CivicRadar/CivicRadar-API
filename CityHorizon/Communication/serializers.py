@@ -141,9 +141,9 @@ class PointsSerializer(serializers.Serializer):
 
 class CommentOnlySerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    SenderName = serializers.CharField(source='Sender.FullName')
-    SenderPicture = serializers.ImageField(source='Sender.Picture')
-    SenderType = serializers.CharField(source='Sender.Type')
+    SenderName = serializers.SerializerMethodField()
+    SenderPicture = serializers.SerializerMethodField()
+    SenderType = serializers.SerializerMethodField()
     Content = serializers.CharField()
     HasOwnership = serializers.SerializerMethodField()
 
@@ -155,11 +155,29 @@ class CommentOnlySerializer(serializers.Serializer):
             return user.id == obj.Sender.id
         return None
 
+    def get_SenderName(self, obj):
+        if obj.IsAnonymous:
+            return "شهروند"
+        return obj.Sender.FullName
+
+    def get_SenderPicture(self, obj):
+        if obj.IsAnonymous:
+            return None
+        return obj.Sender.Picture.url
+
+    def get_SenderType(self, obj):
+        if obj.IsAnonymous:
+            return None
+        return obj.Sender.Type
+
 class CommentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    SenderName = serializers.CharField(source='Sender.FullName')
-    SenderPicture = serializers.ImageField(source='Sender.Picture')
-    SenderType = serializers.CharField(source='Sender.Type')
+    # SenderName = serializers.CharField(source='Sender.FullName')
+    # SenderPicture = serializers.ImageField(source='Sender.Picture')
+    # SenderType = serializers.CharField(source='Sender.Type')
+    SenderName = serializers.SerializerMethodField()
+    SenderPicture = serializers.SerializerMethodField()
+    SenderType = serializers.SerializerMethodField()
     Content = serializers.CharField()
     Replies = serializers.SerializerMethodField()
     Likes = serializers.SerializerMethodField()
@@ -168,6 +186,21 @@ class CommentSerializer(serializers.Serializer):
 
     class Meta:
         fields = ['id', 'SenderName', 'SenderPicture', 'Content', 'Reply', 'Likes', 'DisLikes', 'HasOwnership']
+
+    def get_SenderName(self, obj):
+        if obj.IsAnonymous:
+            return "شهروند"
+        return obj.Sender.FullName
+
+    def get_SenderPicture(self, obj):
+        if obj.IsAnonymous:
+            return None
+        return obj.Sender.Picture.url
+
+    def get_SenderType(self, obj):
+        if obj.IsAnonymous:
+            return None
+        return obj.Sender.Type
 
     def get_Replies(self, obj):
         # if obj.IsAReply:

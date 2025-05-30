@@ -253,10 +253,14 @@ class Comments(APIView):
         cprobe = CityProblem.objects.filter(id=request.data['CityProblemID']).first()
         if cprobe is None:
             raise AuthenticationFailed("City problem not found!")
+        isanony = False
+        if "IsAnonymous" in request.data:
+            isanony = request.data['IsAnonymous']
         comment = Comment(Sender=user, Content=request.data['Content'],
                           CityProblem=cprobe,
                           IsAReply=request.data['IsAReply'],
-                          ReplyID=request.data['ReplyID'])
+                          ReplyID=request.data['ReplyID'],
+                          IsAnonymous=isanony)
         comment.full_clean()
         comment.save()
         return Response({"Success":"You posted a message!"})

@@ -139,6 +139,7 @@ class Comment(models.Model):
     IsAReply = models.BooleanField(default=False)
     ReplyID = models.IntegerField(default=0)
     Date = models.DateTimeField(auto_now_add=True)
+    IsAnonymous = models.BooleanField(default=False)
 
 class CommentReaction(models.Model):
     Comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
