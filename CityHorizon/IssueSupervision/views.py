@@ -6,12 +6,16 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
-                                   Notification, MayorPriority, Organization, Provinces, ReportCitizen)
+                                   Notification, MayorPriority, Organization, Provinces, ReportCitizen, CRPAI)
 from .serializers import (CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer,
                           MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer, ProvinceProblemCountSerializer,
                           HandleCRCSerializer)
 import jwt, datetime
+import json
+from openai import OpenAI
 
+client = OpenAI(
+    api_key='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')
 
 
 class CitizenReportProblem(APIView):
@@ -58,6 +62,37 @@ class CitizenReportProblem(APIView):
         problems = CityProblem.objects.filter(Reporter=user).all()
         serializer = CityProblemSerializer(problems, many=True, context={'userID':user.id})
         return Response(serializer.data)
+
+class CRPAIValidation(APIView):
+    def create_file(self, file_path):
+        with open(file_path, "rb") as file_content:
+            result = client.files.create(
+                file=file_content,
+                purpose="vision",
+            )
+            return result.id
+
+    def post(self, request):
+        myobj = CRPAI(Picture=request.data['Picture'], Information=request.data['Information'])
+        myobj.full_clean()
+        myobj.save()
+        file_id = self.create_file(myobj.Picture.path)
+
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            input=[{
+                "role": "user",
+                "content": [
+                    {"type": "input_text", "text": f"i have a civic report with text {myobj.Information} and a picture, please validate my report based on the following criteria: The report text must be relevant to urban issues (such as potholes, broken streetlights, public cleanliness, etc.), The report text must not contain vulgar or offensive language, The report image must be clear and relevant to the report text, Based on these criteria output standard json format with two values (Validity and Reasons), Validity can be true or false and Reasons is a array with reason key that is several words about the invalidty and its value is the explanation for the reason key, the reason key value pair should be in persian language only"},
+                    {
+                        "type": "input_image",
+                        "file_id": file_id,
+                    },
+                ],
+            }],
+        )
+        myjson = json.loads(response.output_text)
+        return Response(myjson)
 
 class CitizenReportCitizen(APIView):
     def post(self, request):
