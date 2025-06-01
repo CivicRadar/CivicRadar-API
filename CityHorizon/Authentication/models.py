@@ -67,6 +67,10 @@ class CityProblem(models.Model):
     FullAdress = models.CharField(max_length=300)
     Status = models.CharField(default='PendingReview', choices=status_type, max_length=20)
 
+class CRPAI(models.Model):
+    Picture = models.ImageField(upload_to='CRPAI/', null=True, blank=True)
+    Information = models.CharField(max_length=1500)
+
 class ReportCitizen(models.Model):
     Reporter = models.ForeignKey(User, on_delete=models.CASCADE)
     Reported = models.ForeignKey(CityProblem, on_delete=models.CASCADE)

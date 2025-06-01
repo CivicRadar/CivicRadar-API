@@ -13,6 +13,7 @@ db.sqlite3-journal
 **/Profile_Pictures
 **/CivicProblem_Videos
 **/CivicProblem_Pictures
+**/CRPAI
 **/charts
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
