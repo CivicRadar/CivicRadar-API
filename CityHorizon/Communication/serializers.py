@@ -163,7 +163,12 @@ class CommentOnlySerializer(serializers.Serializer):
     def get_SenderPicture(self, obj):
         if obj.IsAnonymous:
             return None
-        return obj.Sender.Picture.url
+
+        picture = getattr(obj.Sender, 'Picture', None)
+        if picture and hasattr(picture, 'url'):
+            return picture.url
+
+        return None
 
     def get_SenderType(self, obj):
         if obj.IsAnonymous:
@@ -195,7 +200,12 @@ class CommentSerializer(serializers.Serializer):
     def get_SenderPicture(self, obj):
         if obj.IsAnonymous:
             return None
-        return obj.Sender.Picture.url
+
+        picture = getattr(obj.Sender, 'Picture', None)
+        if picture and hasattr(picture, 'url'):
+            return picture.url
+
+        return None
 
     def get_SenderType(self, obj):
         if obj.IsAnonymous:
