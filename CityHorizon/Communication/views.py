@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
@@ -186,6 +187,8 @@ class Like(APIView):
         return Response({"Like":react.Like})
 
 class Points(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 

@@ -1,5 +1,6 @@
 from django.contrib.staticfiles.views import serve
 from django.db.models import Count
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from django.shortcuts import render
 from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
@@ -19,6 +20,8 @@ client = OpenAI(
 
 
 class CitizenReportProblem(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         # citizen posts a report
         token = request.COOKIES.get('jwt')
@@ -64,6 +67,8 @@ class CitizenReportProblem(APIView):
         return Response(serializer.data)
 
 class CRPAIValidation(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def create_file(self, file_path):
         with open(file_path, "rb") as file_content:
             result = client.files.create(
@@ -95,6 +100,8 @@ class CRPAIValidation(APIView):
         return Response(myjson)
 
 class CitizenReportCitizen(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         # citizen invalidates other citizen reports
         token = request.COOKIES.get('jwt')
@@ -151,6 +158,8 @@ class CitizenReportCitizen(APIView):
         return Response({"Answer": "you have reported this problem"})
 
 class AllCitizenReport(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         # everybody regradless to their auth token can see all the city problems
         token = request.COOKIES.get('jwt')
@@ -173,6 +182,8 @@ class AllCitizenReport(APIView):
         return Response(serializer.data)
 
 class HandleCRC(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def delete(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -257,6 +268,8 @@ class HandleCRC(APIView):
         return Response({"Answer": "Deleted wrong infractions successfully!"})
 
 class PublicReport(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         problem = CityProblem.objects.filter(id=request.query_params.get('CityProblem_ID')).first()
         if not problem:
@@ -265,6 +278,8 @@ class PublicReport(APIView):
         return Response(serializer.data)
 
 class MayorCityReports(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         # mayor can get the reports in his/her terriority
         token = request.COOKIES.get('jwt')
@@ -286,6 +301,8 @@ class MayorCityReports(APIView):
         return Response(serializer.data)
 
 class MayorNotes(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         # Mayor can see all his/her notes
         token = request.COOKIES.get('jwt')
@@ -394,6 +411,8 @@ class MayorNotes(APIView):
         return Response({'success': 'note deleted successfully'})
 
 class MayorDetermineCityProblemSituation(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -472,6 +491,8 @@ class MayorDetermineCityProblemSituation(APIView):
         return resp
 
 class MayorPrioritize(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -523,6 +544,8 @@ class MayorPrioritize(APIView):
         return Response(serializer.data)
 
 class MayorDelegate(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -638,6 +661,8 @@ class MayorDelegate(APIView):
         return Response({'success': 'organ was deleted successfully!'})
 
 class MayorDedicatedReportPage(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 

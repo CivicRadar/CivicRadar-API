@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -14,6 +15,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 class MayorReportView(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     # def get(self, request):
     #     # Mayor can get the reports in their territory
     #     token = request.COOKIES.get('jwt')

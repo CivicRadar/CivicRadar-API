@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.conf import settings
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +11,8 @@ import jwt, datetime
 
 # Create your views here.
 class Add(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -42,6 +45,8 @@ class Add(APIView):
         return Response({'success': 'Mayor cities added!'})
 
 class List(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -64,6 +69,8 @@ class List(APIView):
         return Response(serializer.data)
 
 class Update(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -93,6 +100,8 @@ class Update(APIView):
         return Response(serializer2.data)
 
 class Delete(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -256,6 +265,8 @@ class RemoveMayorCity(APIView):
         return Response({'success': 'Mayor city deleted'})
 
 class ProvinceMayors(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -280,6 +291,8 @@ class ProvinceMayors(APIView):
         return Response(serializer.data)
 
 class CityMayors(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -304,6 +317,8 @@ class CityMayors(APIView):
         return Response(serializer.data)
 
 class MayorComplex(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 

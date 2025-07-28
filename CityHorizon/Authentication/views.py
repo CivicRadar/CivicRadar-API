@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.http import HttpResponseBadRequest
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from django.shortcuts import render
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
@@ -23,6 +24,8 @@ import jwt, datetime
 
 
 class SignUp(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         request.data['Type'] = 'Citizen'
         email = request.data['Email']
@@ -122,6 +125,8 @@ class SignUp(APIView):
 
 
 class Login(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         try:
             email = request.data['Email']
@@ -196,6 +201,8 @@ class Notifs(APIView):
         return Response({'NotificationDeactivationTime':user.NotificationDeactivationTime})
 
 class Logout(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         response = Response()
         response.delete_cookie(
@@ -229,6 +236,8 @@ class Logout(APIView):
         return Response({'message': 'Your account has been deleted.'})
 
 class Profile(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -293,6 +302,8 @@ class Profile(APIView):
         return Response(serializer.data)
 
 class RequestPasswordReset(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         email = request.data['Email']
         if User.objects.filter(Email=email).exists():
@@ -386,6 +397,8 @@ class RequestPasswordReset(APIView):
 
 
 class PasswordTokenCheck(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request, ui64, token):
         try:
             id=smart_str(urlsafe_base64_decode(ui64))
@@ -398,6 +411,8 @@ class PasswordTokenCheck(APIView):
             raise AuthenticationFailed('Invalid token')
 
 class SetNewPassword(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     serializer_class = SetNewPasswordSerializer
 
     def patch(self, request):
@@ -406,6 +421,8 @@ class SetNewPassword(APIView):
         return Response({'success':'Password updated successfully'})
 
 class EmailVerification(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def get(self, request, token):
         try:
             data = signing.loads(token, salt="my_verification_salt", max_age=24 * 60 * 60)
@@ -419,6 +436,8 @@ class EmailVerification(APIView):
             raise AuthenticationFailed('user not found')
 
 class SetTheme(APIView):
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
     def post(self, request):
         try:
             token = request.COOKIES.get('jwt')
