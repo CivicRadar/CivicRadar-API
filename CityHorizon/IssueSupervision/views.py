@@ -15,7 +15,7 @@ import json
 from openai import OpenAI
 
 client = OpenAI(
-    api_key='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')
+    api_key='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')
 
 
 class CitizenReportProblem(APIView):
