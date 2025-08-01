@@ -12,8 +12,17 @@ from .serializers import (NotoficationSerializer, CityProblemReactionSerializer,
 import jwt, datetime
 
 
-# Create your views here.
+class CustomAnonThrottle(AnonRateThrottle):
+    scope = 'anon'
+
+
 class Notifications(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -62,6 +71,12 @@ class Notifications(APIView):
         return Response({"success":"you have seen this message"})
 
 class MayorNotifications(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -132,6 +147,12 @@ class MayorNotifications(APIView):
         return Response({"success": "you have seen this message"})
 
 class Like(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -187,7 +208,11 @@ class Like(APIView):
         return Response({"Like":react.Like})
 
 class Points(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def get(self, request):
         token = request.COOKIES.get('jwt')
@@ -207,6 +232,12 @@ class Points(APIView):
         return Response(serializer.data)
 
 class Comments(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -269,6 +300,12 @@ class Comments(APIView):
         return Response({"Success":"You posted a message!"})
 
 class CommentReactions(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 

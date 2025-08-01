@@ -23,8 +23,15 @@ from django.core import signing
 import jwt, datetime
 
 
+class CustomAnonThrottle(AnonRateThrottle):
+    scope = 'anon'
+
 class SignUp(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def post(self, request):
         request.data['Type'] = 'Citizen'
@@ -125,7 +132,11 @@ class SignUp(APIView):
 
 
 class Login(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def post(self, request):
         try:
@@ -158,6 +169,12 @@ class Login(APIView):
         raise AuthenticationFailed('your email or password is incorrect')
 
 class Notifs(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -201,7 +218,11 @@ class Notifs(APIView):
         return Response({'NotificationDeactivationTime':user.NotificationDeactivationTime})
 
 class Logout(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def get(self, request):
         response = Response()
@@ -236,7 +257,11 @@ class Logout(APIView):
         return Response({'message': 'Your account has been deleted.'})
 
 class Profile(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def get(self, request):
         token = request.COOKIES.get('jwt')
@@ -302,7 +327,11 @@ class Profile(APIView):
         return Response(serializer.data)
 
 class RequestPasswordReset(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def post(self, request):
         email = request.data['Email']
@@ -397,7 +426,11 @@ class RequestPasswordReset(APIView):
 
 
 class PasswordTokenCheck(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def get(self, request, ui64, token):
         try:
@@ -411,7 +444,11 @@ class PasswordTokenCheck(APIView):
             raise AuthenticationFailed('Invalid token')
 
 class SetNewPassword(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     serializer_class = SetNewPasswordSerializer
 
@@ -421,7 +458,11 @@ class SetNewPassword(APIView):
         return Response({'success':'Password updated successfully'})
 
 class EmailVerification(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def get(self, request, token):
         try:
@@ -436,7 +477,11 @@ class EmailVerification(APIView):
             raise AuthenticationFailed('user not found')
 
 class SetTheme(APIView):
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
 
     def post(self, request):
         try:
