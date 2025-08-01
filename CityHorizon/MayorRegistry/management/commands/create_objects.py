@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from Authentication.models import Provinces, Cities
+from Authentication.models import Provinces, Cities, ProvinceLocation
 
 class Command(BaseCommand):
     help = 'Create objects'
@@ -10,6 +10,8 @@ class Command(BaseCommand):
             return
         obj = Provinces(Name="آذربایجان شرقی")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=46.795927660109506, Latitude=38.10018575214774, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="کشکسرای", Province=obj)
         obj2.save()
         obj2 = Cities(Name="سهند", Province=obj)
@@ -138,6 +140,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="آذربایجان غربی")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=44.76061516073395, Latitude=37.92181567925428, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="تازه شهر", Province=obj)
         obj2.save()
         obj2 = Cities(Name="نالوس", Province=obj)
@@ -226,6 +230,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="اردبیل")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=48.125543768635254, Latitude=38.443343436439186, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="پارس آباد", Province=obj)
         obj2.save()
         obj2 = Cities(Name="فخرآباد", Province=obj)
@@ -282,6 +288,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="اصفهان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=51.57572519532515, Latitude=32.48189472413892, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="گزبرخوار", Province=obj)
         obj2.save()
         obj2 = Cities(Name="زیار", Province=obj)
@@ -501,6 +509,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="البرز")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=50.7637379303447, Latitude=35.91714898570036, Zoom=-3)
+        obj3.save()
         obj2 = Cities(Name="چهارباغ", Province=obj)
         obj2.save()
         obj2 = Cities(Name="آسارا", Province=obj)
@@ -539,6 +549,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="ایلام")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=46.563701280465594, Latitude=33.34998452501665, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="آبدانان", Province=obj)
         obj2.save()
         obj2 = Cities(Name="شباب", Province=obj)
@@ -593,6 +605,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="بوشهر")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=51.02599132108805, Latitude=28.939138617769576, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="ریز", Province=obj)
         obj2.save()
         obj2 = Cities(Name="برازجان", Province=obj)
@@ -669,6 +683,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="تهران")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=51.401568770652425, Latitude=35.696799084520904, Zoom=-3)
+        obj3.save()
         obj2 = Cities(Name="شاهدشهر", Province=obj)
         obj2.save()
         obj2 = Cities(Name="پیشوا", Province=obj)
@@ -761,6 +777,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="چهارمحال و بختیاری")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=50.65789223388208, Latitude=32.116387848814014, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="وردنجان", Province=obj)
         obj2.save()
         obj2 = Cities(Name="گوجان", Province=obj)
@@ -845,6 +863,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="خراسان جنوبی")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=58.01885542044644, Latitude=33.097041823662224, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="اسلامیه", Province=obj)
         obj2.save()
         obj2 = Cities(Name="شوسف", Province=obj)
@@ -905,6 +925,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="خراسان رضوی")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=58.83089491081669, Latitude=35.761008011103144, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="بار", Province=obj)
         obj2.save()
         obj2 = Cities(Name="نیل شهر", Province=obj)
@@ -1053,6 +1075,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="خراسان شمالی")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=57.120626096511025, Latitude=37.530660795321765, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="چناران شهر", Province=obj)
         obj2.save()
         obj2 = Cities(Name="راز", Province=obj)
@@ -1101,6 +1125,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="خوزستان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=49.040402354453086, Latitude=31.516783138181896, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="هفتگل", Province=obj)
         obj2.save()
         obj2 = Cities(Name="بیدروبه", Province=obj)
@@ -1259,6 +1285,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="زنجان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=48.392012120970506, Latitude=36.680832680997916, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="سجاس", Province=obj)
         obj2.save()
         obj2 = Cities(Name="زرین رود", Province=obj)
@@ -1305,6 +1333,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="سمنان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=54.12442048960197, Latitude=35.70929970493124, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="ایوانکی", Province=obj)
         obj2.save()
         obj2 = Cities(Name="مجن", Province=obj)
@@ -1349,6 +1379,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="سیستان و بلوچستان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=60.97947177161487, Latitude=28.1674941183768, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="محمدی", Province=obj)
         obj2.save()
         obj2 = Cities(Name="شهرک علی اکبر", Province=obj)
@@ -1427,6 +1459,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="فارس")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=53.01443132053383, Latitude=29.476006914005396, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="کازرون", Province=obj)
         obj2.save()
         obj2 = Cities(Name="کارزین (فتح آباد)", Province=obj)
@@ -1633,6 +1667,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="قزوین")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=49.957454767831855, Latitude=36.19031370189395, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="سگزآباد", Province=obj)
         obj2.save()
         obj2 = Cities(Name="بیدستان", Province=obj)
@@ -1687,6 +1723,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="قم")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=50.884589911696914, Latitude=34.67619755288455, Zoom=-4)
+        obj3.save()
         obj2 = Cities(Name="کهک", Province=obj)
         obj2.save()
         obj2 = Cities(Name="قم", Province=obj)
@@ -1703,6 +1741,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="کردستان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=47.027058018721604, Latitude=35.57679913259408, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="قروه", Province=obj)
         obj2.save()
         obj2 = Cities(Name="توپ آغاج", Province=obj)
@@ -1765,6 +1805,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="کرمان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=57.238142659006655, Latitude=29.757260592365828, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="کهنوج", Province=obj)
         obj2.save()
         obj2 = Cities(Name="بلوک", Province=obj)
@@ -1911,6 +1953,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="کرمانشاه")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=46.73034651212183, Latitude=34.377959387122786, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="سنقز", Province=obj)
         obj2.save()
         obj2 = Cities(Name="شاهو", Province=obj)
@@ -1979,6 +2023,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="کهگیلویه و بویراحمد")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=50.83651045239543, Latitude=30.858865839110656, Zoom=-4)
+        obj3.save()
         obj2 = Cities(Name="'گراب سفلی", Province=obj)
         obj2.save()
         obj2 = Cities(Name="لنده", Province=obj)
@@ -2017,6 +2063,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="گلستان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=54.90412719757785, Latitude=37.18485876311898, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="سیمین شهر", Province=obj)
         obj2.save()
         obj2 = Cities(Name="مزرعه", Province=obj)
@@ -2079,6 +2127,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="گیلان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=49.33973210496682, Latitude=37.3320382839267, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="منجیل", Province=obj)
         obj2.save()
         obj2 = Cities(Name="شلمان", Province=obj)
@@ -2187,6 +2237,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="لرستان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=48.334412089779, Latitude=33.42991322338277, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="چالانچولان", Province=obj)
         obj2.save()
         obj2 = Cities(Name="بیران شهر", Province=obj)
@@ -2241,6 +2293,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="مازندران")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=52.38841460744801, Latitude=36.578628475158744, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="گلوگاه", Province=obj)
         obj2.save()
         obj2 = Cities(Name="پل سفید", Province=obj)
@@ -2359,6 +2413,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="مرکزی")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=49.75673817827693, Latitude=34.448677161580655, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="آستانه", Province=obj)
         obj2.save()
         obj2 = Cities(Name="خنجین", Province=obj)
@@ -2429,6 +2485,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="هرمزگان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=56.45358846746354, Latitude=27.272717577066828, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="بیکا", Province=obj)
         obj2.save()
         obj2 = Cities(Name="تیرور", Province=obj)
@@ -2509,6 +2567,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="همدان")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=48.71620605172322, Latitude=34.88507618740631, Zoom=-5)
+        obj3.save()
         obj2 = Cities(Name="زنگنه", Province=obj)
         obj2.save()
         obj2 = Cities(Name="دمق", Province=obj)
@@ -2571,6 +2631,8 @@ class Command(BaseCommand):
 
         obj = Provinces(Name="یزد")
         obj.save()
+        obj3 = ProvinceLocation(Province=obj, Longitude=54.547280099943194, Latitude=31.949825662795046, Zoom=-6)
+        obj3.save()
         obj2 = Cities(Name="مروست", Province=obj)
         obj2.save()
         obj2 = Cities(Name="مهردشت", Province=obj)

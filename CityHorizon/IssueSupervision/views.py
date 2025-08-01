@@ -7,16 +7,17 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
-                                   Notification, MayorPriority, Organization, Provinces, ReportCitizen, CRPAI)
+                                   Notification, MayorPriority, Organization, Provinces, ReportCitizen, CRPAI, ProvinceLocation)
 from .serializers import (CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer,
-                          MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer, ProvinceProblemCountSerializer,
-                          HandleCRCSerializer)
+                          MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer,
+                          ProvinceProblemCountSerializer,
+                          HandleCRCSerializer, ProvinceLocationSerializer)
 import jwt, datetime
 import json
 from openai import OpenAI
 
 client = OpenAI(
-    api_key='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')
+    api_key='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')
 
 class CustomAnonThrottle(AnonRateThrottle):
     scope = 'anon'
@@ -854,4 +855,21 @@ class ComplexReportCount(APIView):
             raise AuthenticationFailed("variable name is wrong or value is null")
         query = Cities.objects.filter(Province__id=myvar).annotate(problems_count=Count('cityproblem')).order_by('id')
         serializer = CityProblemCountSerializer(query, many=True)
+        return Response(serializer.data)
+
+class ProvincesLocation(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
+    def get(self, request):
+        myvar = request.query_params.get('Province_ID')
+        if myvar is None:
+            raise AuthenticationFailed("variable name is wrong or value is null")
+        query = ProvinceLocation.objects.filter(id=myvar).first()
+        if query is None:
+            return AuthenticationFailed("There is no such a province")
+        serializer = ProvinceLocationSerializer(query)
         return Response(serializer.data)

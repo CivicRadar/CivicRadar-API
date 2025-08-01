@@ -248,3 +248,8 @@ class ProvinceProblemCountSerializer(serializers.ModelSerializer):
         model = Provinces
         fields = ['id', 'Name', 'problems_count']
 
+class ProvinceLocationSerializer(serializers.Serializer):
+    Name = serializers.CharField(source='Province.Name')
+    Longitude = serializers.FloatField()
+    Latitude = serializers.FloatField()
+    Zoom = serializers.IntegerField()
