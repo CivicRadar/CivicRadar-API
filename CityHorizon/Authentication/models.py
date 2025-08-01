@@ -30,6 +30,12 @@ class User(AbstractUser):
 class Provinces(models.Model):
     Name = models.CharField(max_length=40, unique=True)
 
+class ProvinceLocation(models.Model):
+    Province = models.ForeignKey(Provinces, on_delete=models.CASCADE)
+    Longitude = models.FloatField()
+    Latitude = models.FloatField()
+    Zoom = models.IntegerField()
+
 class Cities(models.Model):
     Name = models.CharField(max_length=50)
     Province = models.ForeignKey(Provinces, on_delete=models.CASCADE)

@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -13,7 +14,16 @@ import logging
 # Set up logging
 logger = logging.getLogger(__name__)
 
+class CustomAnonThrottle(AnonRateThrottle):
+    scope = 'anon'
+
 class MayorReportView(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     # def get(self, request):
     #     # Mayor can get the reports in their territory
     #     token = request.COOKIES.get('jwt')
@@ -56,6 +66,12 @@ class MayorReportView(APIView):
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
 class Counter(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         now = datetime.now()
         doob = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -67,6 +83,12 @@ class Counter(APIView):
         return Response(data)
 
 class LandingCounter(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         data = {'MayorCount': User.objects.filter(Type='Mayor').count(),
                 'UserCount': User.objects.filter(Type='Citizen', Verified=True).count(),

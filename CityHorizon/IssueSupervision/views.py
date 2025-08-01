@@ -1,24 +1,34 @@
 from django.contrib.staticfiles.views import serve
 from django.db.models import Count
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from django.shortcuts import render
 from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Authentication.models import (CityProblem, ReportCitizen, MayorCities, User, Cities, MayorNote,
-                                   Notification, MayorPriority, Organization, Provinces, ReportCitizen, CRPAI)
+                                   Notification, MayorPriority, Organization, Provinces, ReportCitizen, CRPAI, ProvinceLocation)
 from .serializers import (CityProblemSerializer, ReportCitizenSerializer, NoteSerializer, MayorPrioritySerializer,
-                          MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer, ProvinceProblemCountSerializer,
-                          HandleCRCSerializer)
+                          MayorCompleteCityProblemSerializer, OrganizationSerializer, CityProblemCountSerializer,
+                          ProvinceProblemCountSerializer,
+                          HandleCRCSerializer, ProvinceLocationSerializer)
 import jwt, datetime
 import json
 from openai import OpenAI
 
 client = OpenAI(
-    api_key='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')
+    api_key='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')
 
+class CustomAnonThrottle(AnonRateThrottle):
+    scope = 'anon'
 
 class CitizenReportProblem(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         # citizen posts a report
         token = request.COOKIES.get('jwt')
@@ -64,6 +74,10 @@ class CitizenReportProblem(APIView):
         return Response(serializer.data)
 
 class CRPAIValidation(APIView):
+
+    def get_throttles(self):
+        return []
+
     def create_file(self, file_path):
         with open(file_path, "rb") as file_content:
             result = client.files.create(
@@ -95,6 +109,12 @@ class CRPAIValidation(APIView):
         return Response(myjson)
 
 class CitizenReportCitizen(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         # citizen invalidates other citizen reports
         token = request.COOKIES.get('jwt')
@@ -151,6 +171,12 @@ class CitizenReportCitizen(APIView):
         return Response({"Answer": "you have reported this problem"})
 
 class AllCitizenReport(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         # everybody regradless to their auth token can see all the city problems
         token = request.COOKIES.get('jwt')
@@ -173,6 +199,12 @@ class AllCitizenReport(APIView):
         return Response(serializer.data)
 
 class HandleCRC(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def delete(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -257,6 +289,12 @@ class HandleCRC(APIView):
         return Response({"Answer": "Deleted wrong infractions successfully!"})
 
 class PublicReport(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         problem = CityProblem.objects.filter(id=request.query_params.get('CityProblem_ID')).first()
         if not problem:
@@ -265,6 +303,12 @@ class PublicReport(APIView):
         return Response(serializer.data)
 
 class MayorCityReports(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         # mayor can get the reports in his/her terriority
         token = request.COOKIES.get('jwt')
@@ -286,6 +330,12 @@ class MayorCityReports(APIView):
         return Response(serializer.data)
 
 class MayorNotes(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         # Mayor can see all his/her notes
         token = request.COOKIES.get('jwt')
@@ -394,6 +444,12 @@ class MayorNotes(APIView):
         return Response({'success': 'note deleted successfully'})
 
 class MayorDetermineCityProblemSituation(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -472,6 +528,12 @@ class MayorDetermineCityProblemSituation(APIView):
         return resp
 
 class MayorPrioritize(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -523,6 +585,12 @@ class MayorPrioritize(APIView):
         return Response(serializer.data)
 
 class MayorDelegate(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -638,6 +706,12 @@ class MayorDelegate(APIView):
         return Response({'success': 'organ was deleted successfully!'})
 
 class MayorDedicatedReportPage(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -658,6 +732,12 @@ class MayorDedicatedReportPage(APIView):
         return Response(serializer.data)
 
 class ReportCount(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -677,6 +757,12 @@ class ReportCount(APIView):
         return Response({'count': problems})
 
 class CityReportCount(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -701,6 +787,12 @@ class CityReportCount(APIView):
         return Response({'count': problems, 'ProvinceName': city.Province.Name})
 
 class ProvinceReportCount(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -725,12 +817,24 @@ class ProvinceReportCount(APIView):
         return Response({'count': problems})
 
 class CitiesReportCount(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         query = Cities.objects.annotate(problems_count=Count('cityproblem')).order_by('id')
         serializer = CityProblemCountSerializer(query, many=True)
         return Response(serializer.data)
 
 class ProvincesReportCount(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         query = Provinces.objects.annotate(
             problems_count=Count('cities__cityproblem')
@@ -739,10 +843,33 @@ class ProvincesReportCount(APIView):
         return Response(serializer.data)
 
 class ComplexReportCount(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         myvar = request.query_params.get('Province_ID')
         if myvar is None:
             raise AuthenticationFailed("variable name is wrong or value is null")
         query = Cities.objects.filter(Province__id=myvar).annotate(problems_count=Count('cityproblem')).order_by('id')
         serializer = CityProblemCountSerializer(query, many=True)
+        return Response(serializer.data)
+
+class ProvincesLocation(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
+    def get(self, request):
+        myvar = request.query_params.get('Province_ID')
+        if myvar is None:
+            raise AuthenticationFailed("variable name is wrong or value is null")
+        query = ProvinceLocation.objects.filter(id=myvar).first()
+        if query is None:
+            return AuthenticationFailed("There is no such a province")
+        serializer = ProvinceLocationSerializer(query)
         return Response(serializer.data)

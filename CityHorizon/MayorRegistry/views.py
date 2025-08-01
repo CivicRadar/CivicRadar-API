@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.conf import settings
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,8 +9,15 @@ from Authentication.serializers import UserSerializer, UserIDSerializer
 from .serializers import ProvinceSerializer, CitySerializer, MayorCitySerializer, MayorInfoSerializer, MayorComplexSerializer
 import jwt, datetime
 
-# Create your views here.
+class CustomAnonThrottle(AnonRateThrottle):
+    scope = 'anon'
+
+
 class Add(APIView):
+
+    def get_throttles(self):
+        return [CustomAnonThrottle()]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -42,6 +50,10 @@ class Add(APIView):
         return Response({'success': 'Mayor cities added!'})
 
 class List(APIView):
+    
+    def get_throttles(self):
+        return []
+    
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -64,6 +76,10 @@ class List(APIView):
         return Response(serializer.data)
 
 class Update(APIView):
+
+    def get_throttles(self):
+        return [CustomAnonThrottle()]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -93,6 +109,10 @@ class Update(APIView):
         return Response(serializer2.data)
 
 class Delete(APIView):
+
+    def get_throttles(self):
+        return [CustomAnonThrottle()]
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -118,6 +138,10 @@ class Delete(APIView):
         return Response({'success': 'Deleted successfully!'})
 
 class ProvinceList(APIView):
+
+    def get_throttles(self):
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -139,6 +163,10 @@ class ProvinceList(APIView):
         return Response(serializer.data)
 
 class CityList(APIView):
+
+    def get_throttles(self):
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -164,6 +192,12 @@ class CityList(APIView):
         return Response(serializer.data)
 
 class AddMayorCity(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -197,6 +231,10 @@ class AddMayorCity(APIView):
         raise AuthenticationFailed('Mayor City already added!')
 
 class ListMayorCity(APIView):
+
+    def get_throttles(self):
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -224,6 +262,12 @@ class ListMayorCity(APIView):
         return Response(serializer.data)
 
 class RemoveMayorCity(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -256,6 +300,12 @@ class RemoveMayorCity(APIView):
         return Response({'success': 'Mayor city deleted'})
 
 class ProvinceMayors(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -280,6 +330,12 @@ class ProvinceMayors(APIView):
         return Response(serializer.data)
 
 class CityMayors(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def post(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -304,6 +360,12 @@ class CityMayors(APIView):
         return Response(serializer.data)
 
 class MayorComplex(APIView):
+
+    def get_throttles(self):
+        if self.request.method != 'GET' and self.request.method != 'PUT':
+            return [CustomAnonThrottle()]
+        return []
+
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
